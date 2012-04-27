@@ -152,8 +152,8 @@ public class Karma extends JavaPlugin {
 					String ranksString = config.getString("viewranks.prefix");
 					KarmaGroup group = this.startGroup;
 					while (group != null) {
-						ranksString += group.getGroupName() + "("
-								+ ChatColor.GREEN + group.getKarmaPoints()
+						ranksString += group.getChatColor() + group.getGroupName() + ChatColor.GRAY + "("
+								+ ChatColor.YELLOW + group.getKarmaPoints()
 								+ ChatColor.GRAY + ")";
 						if (group.getNext() != null)
 							ranksString += ChatColor.WHITE + " -> "
@@ -173,6 +173,10 @@ public class Karma extends JavaPlugin {
 					if (!sender.hasPermission("karma.gift")) {
 						this.msg(sender,
 								config.getString("errors.nopermission"));
+						return true;
+					}
+					if (args.length < 2) {
+						this.msg(sender, config.getString("errors.badargs"));
 						return true;
 					}
 					Player giftTarget = this.getServer().getPlayer(args[1]);
@@ -260,6 +264,10 @@ public class Karma extends JavaPlugin {
 					return true;
 				}
 				if (args[0].equalsIgnoreCase("promote") || args[0].equalsIgnoreCase("promo")) {
+					if (args.length < 2) {
+						this.msg(sender, config.getString("errors.badargs"));
+						return true;
+					}
 					Player promoteTarget = this.getServer().getPlayer(args[1]);
 					KarmaGroup currentGroup = this.startGroup;
 					if (promoteTarget == null) {
@@ -291,7 +299,7 @@ public class Karma extends JavaPlugin {
 																.getGroupName()));
 								return true;
 							} else {
-								sender.sendMessage(config
+								this.msg(sender, config
 										.getString("errors.nopermission"));
 								return true;
 							}
@@ -301,6 +309,11 @@ public class Karma extends JavaPlugin {
 					}
 				}
 				if (args[0].equalsIgnoreCase("set")) {
+					if (args.length < 3) {
+						this.msg(sender, config.getString("errors.badargs"));
+						return true;
+					}
+
 					try {
 						Integer.parseInt(args[2]);
 					} catch (NumberFormatException e) {
@@ -626,12 +639,13 @@ public class Karma extends JavaPlugin {
 		while (group != null) {
 			String perm = "karma." + group.getGroupName();
 			if (!player.hasPermission(perm)) {
-				return lastGroup.getGroupName() + " (" + ChatColor.GREEN
+				return lastGroup.getChatColor() + lastGroup.getGroupName() + " (" + ChatColor.YELLOW
 						+ lastGroup.getKarmaPoints() + ChatColor.GRAY + ")";
 			}
 			lastGroup = group;
 			if (group.getNext() == null) {
-				return group.getGroupName();
+				return group.getChatColor() + group.getGroupName() + " (" + ChatColor.YELLOW
+				+ group.getKarmaPoints() + ChatColor.GRAY + ")";
 			}
 			group = group.getNext();
 		}
