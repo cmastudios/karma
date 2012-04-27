@@ -113,18 +113,11 @@ public class Karma extends JavaPlugin {
 		try {
 			if (command.getName().equals("karma")
 					|| command.getName().equals("k")) {
-				String cmd;
-				if (args.length < 1) {
-					cmd = "";
-				} else {
-					cmd = args[0].toLowerCase();
-				}
-				switch (com.tommytony.karma.Command.getCommand(cmd)) {
-				case 0:
+				if (args.length == 0) {
 					// Check their own karma
 					if (!(sender instanceof Player)) {
 						sender.sendMessage("This command cannot be used by console");
-						break;
+						return true;
 					}
 					KarmaPlayer karmaCheckPlayer = this.players
 							.get(((Player) sender).getName());
@@ -152,39 +145,10 @@ public class Karma extends JavaPlugin {
 														karmaCheckPlayer).toString()));
 					}
 					karmaCheckPlayer = null;
-					break;
-				case 1:
-					// Check other players karma
-					Player checkOtherTarget = this.getServer().getPlayer(
-							args[0]);
-					if (checkOtherTarget == null) {
-						this.msg(sender, config.getString("errors.noplayer"));
-						break;
-					}
-					KarmaPlayer karmaCheckOtherTarget = this.players.get(checkOtherTarget
-							.getName());
-					if (karmaCheckOtherTarget != null) {
-						this.msg(
-								sender,
-								config.getString("check.others.message")
-										.replace("<player>",
-												checkOtherTarget.getName())
-										.replace(
-												"<points>",
-												karmaCheckOtherTarget.getKarmaPoints()
-														+ "")
-										.replace(
-												"<curgroupcolor>",
-												getPlayerGroupColor(karmaCheckOtherTarget)
-														.toString()));
-					} else {
-						this.msg(sender, config.getString("errors.noplayer"));
-					}
-					checkOtherTarget = null;
-					karmaCheckOtherTarget = null;
-
-					break;
-				case 2:
+					return true;
+				}
+				
+				if (args[0].equalsIgnoreCase("ranks")) {
 					String ranksString = config.getString("viewranks.prefix");
 					KarmaGroup group = this.startGroup;
 					while (group != null) {
@@ -197,22 +161,24 @@ public class Karma extends JavaPlugin {
 						group = group.getNext();
 					}
 					this.msg(sender, ranksString);
-					break;
-				case 3:
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("help")) {
 					for (String line : config.getStringList("help")) {
 						this.msg(sender, line);
 					}
-					break;
-				case 4:
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("gift")) {
 					if (!sender.hasPermission("karma.gift")) {
 						this.msg(sender,
 								config.getString("errors.nopermission"));
-						break;
+						return true;
 					}
 					Player giftTarget = this.getServer().getPlayer(args[1]);
 					if (giftTarget == null) {
 						this.msg(sender, config.getString("errors.noplayer"));
-						break;
+						return true;
 					}
 					KarmaPlayer karmaGiver = null;
 					if (sender instanceof Player) {
@@ -258,7 +224,7 @@ public class Karma extends JavaPlugin {
 															"<minutes>",
 															((3600 - since) / 60)
 																	+ ""));
-									break;
+									return true;
 								}
 							}
 
@@ -291,19 +257,20 @@ public class Karma extends JavaPlugin {
 											"Karma> Couldn't find target or targetted self.");
 						}
 					}
-					break;
-				case 5:
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("promote") || args[0].equalsIgnoreCase("promo")) {
 					Player promoteTarget = this.getServer().getPlayer(args[1]);
 					KarmaGroup currentGroup = this.startGroup;
 					if (promoteTarget == null) {
 						this.msg(sender,
 								config.getString("promote.messages.noplayer"));
-						break;
+						return true;
 					}
 					KarmaPlayer karmaPromoteTarget = this.players.get(promoteTarget
 							.getName());
 					if (karmaPromoteTarget == null)
-						break;
+						return true;
 					while (currentGroup != null) {
 						if (karmaPromoteTarget.getKarmaPoints() < currentGroup
 								.getKarmaPoints()) {
@@ -322,23 +289,24 @@ public class Karma extends JavaPlugin {
 														"<group>",
 														currentGroup
 																.getGroupName()));
-								break;
+								return true;
 							} else {
 								sender.sendMessage(config
 										.getString("errors.nopermission"));
-								break;
+								return true;
 							}
 
 						}
 						currentGroup = currentGroup.getNext();
 					}
-				case 6:
+				}
+				if (args[0].equalsIgnoreCase("set")) {
 					try {
 						Integer.parseInt(args[2]);
 					} catch (NumberFormatException e) {
 						sender.sendMessage(ChatColor.RED
 								+ "The third argument must be an integer!");
-						break;
+						return true;
 					}
 					List<Player> matches3 = this.getServer().matchPlayer(
 							args[1]);
@@ -347,12 +315,46 @@ public class Karma extends JavaPlugin {
 						return this.setAmount(matches3,
 								Integer.parseInt(args[2]));
 					}
-					break;
-				case -1:
-					this.msg(sender, config.getString("errors.unknowncommand"));
-					break;
+					return true;
 				}
-			}
+				if (args.length == 1) {
+					// Check other players karma
+					Player checkOtherTarget = this.getServer().getPlayer(
+							args[0]);
+					if (checkOtherTarget == null) {
+						this.msg(sender, config.getString("errors.noplayer"));
+						return true;
+					}
+					KarmaPlayer karmaCheckOtherTarget = this.players.get(checkOtherTarget
+							.getName());
+					if (karmaCheckOtherTarget != null) {
+						this.msg(
+								sender,
+								config.getString("check.others.message")
+										.replace("<player>",
+												checkOtherTarget.getName())
+										.replace(
+												"<points>",
+												karmaCheckOtherTarget.getKarmaPoints()
+														+ "")
+										.replace(
+												"<curgroupcolor>",
+												getPlayerGroupColor(karmaCheckOtherTarget)
+														.toString()));
+					} else {
+						this.msg(sender, config.getString("errors.noplayer"));
+					}
+					checkOtherTarget = null;
+					karmaCheckOtherTarget = null;
+
+					return true;
+				}
+				
+					this.msg(sender, config.getString("errors.unknowncommand"));
+					return true;
+					
+				}
+			
 		} catch (Exception e) {
 			this.msg(sender, config.getString("errors.commandexception")
 					.replace("<exception>", e.toString()));
