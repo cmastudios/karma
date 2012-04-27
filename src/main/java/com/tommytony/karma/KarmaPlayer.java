@@ -8,8 +8,6 @@ public class KarmaPlayer {
 	private int karmaPoints;
 	private long lastActivityTime;
 	private long lastGift;
-	private long lastPrize;
-
 	public KarmaPlayer(Karma karma, String name, int karmaPoints, long lastActivityTime, long lastGift) {
 		this.karma = karma;
 		this.name = name;

@@ -1,7 +1,8 @@
 name: Karma
-version: 0.1
+version: 0.2
 description: Karmic auto-ranking
 author: tommytony
+authors: [cmastudios]
 website: https://github.com/taoneill/karma
 
 main: com.tommytony.karma.Karma
@@ -9,6 +10,6 @@ main: com.tommytony.karma.Karma
 commands:
   karma:
     description: The main karma command
-    usage: Karma> Use /karma to check your karma points. Use /karma <person> to see points of others. Use /karma gift <person> to give karma to another player. Use /karma ranks to enumerate ranks. Use /karma builder <person> to give another player build rights. Use /k as an alias.
+    usage: /<command> help
     aliases: k
-    permission:
+permissions:

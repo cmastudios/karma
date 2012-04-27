@@ -1,0 +1,90 @@
+# KARMA+ CONFIGURATION FILE
+#
+# Add the config node 'karma.<GROUP>' in your
+# permissions setup for the specified group for them to 
+# be recognized as that group in karma
+#
+# Permissions:
+# karma.gift: Give karma to another player (to stop people
+#   with lots of alts to quickly gain karma)
+# karma.promote.<GROUP>: Give a player enough karma
+#   so that they are in that group (replaces /k builder)
+# karma.set: Allow access to change the raw amount of
+#   karma a player has (like to reward them with karma)
+#
+# PUT GROUPS IN DECREASING ORDER
+
+prefix: '&5Karma>&d '
+groups:
+    greybeard:
+        color: '2'
+        points: 2000
+    moderator:
+        color: '9'
+        points: 1000
+    minimod:
+        color: b
+        points: 500
+    zonemaker:
+        color: e
+        points: 100
+    builder:
+        color: '7'
+        points: 10
+    recruit:
+        color: d
+        points: 0
+        first: true
+party:
+    time:
+        minimum: 10
+        maximum: 30
+    points: 1
+    messages:
+        #            \'/ If you need to use a ' in a string, type another ' after it so YAML knows you are not just ending the string.     
+        announce: 'It''s a &6/karma&d party!'
+        pointgain: 'You gain &6<points>&d karma point(s).'
+        afknogain: 'You lost out on &6<points>&d karma point(s) because you were AFK.'
+promotion:
+    command: 'manuadd <player> <group><NEWLINE>mansave'
+    message: 'Good karma! &6<player>&d promoted to <groupcolor><group>&d.'
+demotion:
+    command: 'manuadd <player> <group><NEWLINE>mansave'
+    message: 'Bad karma. &6<player>&d demoted to <groupcolor><group>&d.'
+
+gift:
+    amount: 1
+    messages:
+        togifter: 'You gave &6<player> <points>&d karma. How generous!'
+        toreceiver: '&6<player>&d gave you &6<points>&d karma.'
+        cooldown: 'You need to wait &6<minutes>&d minutes before gifting again.
+check:
+    self:
+        message: 'You have &6<points>&d karma points.<NEWLINE>Current rank: <curgroupcolor><curgroup>&d. Next rank: <nextgroupcolor><nextgroup>'
+    others:
+        message: '<curgroupcolor><player>&d has &6<points>&d karma points.'
+promocommand:
+    messages:
+        highest: '&cThat player is already the highest rank.'
+        promoted: '&6<player>&d promoted to &6<group>&d.'
+newplayer:
+    message: 'This server supports automatic ranking.<NEWLINE>Use &6/karma help&d for more information.'
+viewranks:
+    prefix: 'Ranks: '
+help:
+- 'Use &6/karma&d to check your karma points.' 
+- 'Use &6/karma <person>&d to see points of others.'
+- 'Use &6/karma gift <person>&d to give karma to another player.' 
+- 'Use &6/karma ranks&d to view earnable ranks.' 
+- 'Use &6/k&d as an alias.'
+errors:
+    noplayer: '&cCannot find the player'
+    nopermission: '&cYou do not have permission'
+    unknowncommand: '&cUnknown command. Use &6/karma help&d.'
+    commandexception: '&cException <exception> occured while processing your command.'
+war:
+    bonus: false
+    messages:
+        creator: 'Thanks for making warzones!'
+        player: 'Thanks for playing War!'
+        

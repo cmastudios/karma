@@ -4,11 +4,28 @@
   <artifactId>karma</artifactId>
   <version>0.2-SNAPSHOT</version>
   <name>Karma</name>
+  <url>http://github.com/taoneill/karma/</url>
+  <repositories>
+    <repository>
+        <id>bukkit-repo</id>
+        <url>http://repo.bukkit.org/content/groups/public/</url>
+    </repository>
+    <repository>
+        <id>cmastudios-repo</id>
+        <url>http://cmastudios.me/repo/maven/</url>
+    </repository>
+  </repositories>
   <dependencies>
   	<dependency>
   		<groupId>org.bukkit</groupId>
   		<artifactId>bukkit</artifactId>
-  		<version>1.1-R3</version>
+  		<version>1.2.5-R1.0</version>
+  		<scope>compile</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.tommytony</groupId>
+  		<artifactId>war</artifactId>
+  		<version>0.1</version>
   		<scope>compile</scope>
   	</dependency>
   </dependencies>
@@ -31,6 +48,7 @@
           <directory>${basedir}/src/main/resources/</directory>
           <includes>
             <include>plugin.yml</include>
+            <include>config.yml</include>
           </includes>
         </resource>    
       </resources>

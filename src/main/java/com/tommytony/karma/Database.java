@@ -102,12 +102,10 @@ public class Database {
 	            Statement statement = connection.createStatement();
 	            statement.executeUpdate("create table if not exists players (name text, karma numeric, lastactive numeric)");
 	            
-	            boolean updatedSchema = true;
 	            try {
 	            	Statement alterStatement = connection.createStatement();
 	            	alterStatement.executeUpdate("alter table players add column lastgift numeric");
 	            } catch (SQLException e) {
-	            	updatedSchema = false;
 	            }
 	            
 	            this.addColumn(connection, "lastgift numeric");
