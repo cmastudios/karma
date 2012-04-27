@@ -120,7 +120,7 @@ public class Karma extends JavaPlugin {
 					cmd = args[0].toLowerCase();
 				}
 				switch (com.tommytony.karma.Command.getCommand(cmd)) {
-				case CHECK:
+				case 0:
 					// Check their own karma
 					if (!(sender instanceof Player)) {
 						sender.sendMessage("This command cannot be used by console");
@@ -153,7 +153,7 @@ public class Karma extends JavaPlugin {
 					}
 					karmaCheckPlayer = null;
 					break;
-				case CHECKOTHER:
+				case 1:
 					// Check other players karma
 					Player checkOtherTarget = this.getServer().getPlayer(
 							args[0]);
@@ -184,7 +184,7 @@ public class Karma extends JavaPlugin {
 					karmaCheckOtherTarget = null;
 
 					break;
-				case RANKS:
+				case 2:
 					String ranksString = config.getString("viewranks.prefix");
 					KarmaGroup group = this.startGroup;
 					while (group != null) {
@@ -198,12 +198,12 @@ public class Karma extends JavaPlugin {
 					}
 					this.msg(sender, ranksString);
 					break;
-				case HELP:
+				case 3:
 					for (String line : config.getStringList("help")) {
 						this.msg(sender, line);
 					}
 					break;
-				case GIFT:
+				case 4:
 					if (!sender.hasPermission("karma.gift")) {
 						this.msg(sender,
 								config.getString("errors.nopermission"));
@@ -292,7 +292,7 @@ public class Karma extends JavaPlugin {
 						}
 					}
 					break;
-				case PROMOTE:
+				case 5:
 					Player promoteTarget = this.getServer().getPlayer(args[1]);
 					KarmaGroup currentGroup = this.startGroup;
 					if (promoteTarget == null) {
@@ -332,7 +332,7 @@ public class Karma extends JavaPlugin {
 						}
 						currentGroup = currentGroup.getNext();
 					}
-				case SET:
+				case 6:
 					try {
 						Integer.parseInt(args[2]);
 					} catch (NumberFormatException e) {
@@ -348,7 +348,7 @@ public class Karma extends JavaPlugin {
 								Integer.parseInt(args[2]));
 					}
 					break;
-				case UNKNOWN:
+				case -1:
 					this.msg(sender, config.getString("errors.unknowncommand"));
 					break;
 				}
@@ -646,7 +646,7 @@ public class Karma extends JavaPlugin {
 			}
 			group = group.getNext();
 		}
-		return null;
+		return ChatColor.WHITE;
 	}
 
 	private ChatColor getPlayerGroupColor(KarmaPlayer karmaPlayer) {
@@ -664,7 +664,7 @@ public class Karma extends JavaPlugin {
 			}
 			group = group.getNext();
 		}
-		return null;
+		return ChatColor.WHITE;
 	}
 
 	public Player findPlayer(String playerName) {
