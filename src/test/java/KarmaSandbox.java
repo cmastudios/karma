@@ -1,13 +1,9 @@
 import static org.junit.Assert.*;
 
-import java.util.Random;
-import java.util.logging.Level;
-
 import org.bukkit.ChatColor;
 import org.junit.Test;
 
 import com.tommytony.karma.KarmaGroup;
-import com.tommytony.karma.KarmaPlayer;
 
 
 
@@ -46,7 +42,6 @@ public class KarmaSandbox {
 	public void testLastActive() {
 		
 		long now = System.currentTimeMillis();
-		long twominutesago = now - 120*1000;
 		long fifteenminutesago = now - 15*60*1000;
 		
 		long activeInterval = System.currentTimeMillis() - fifteenminutesago;

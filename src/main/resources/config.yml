@@ -57,7 +57,7 @@ gift:
     messages:
         togifter: 'You gave &6<player> <points>&d karma. How generous!'
         toreceiver: '&6<player>&d gave you &6<points>&d karma.'
-        cooldown: 'You need to wait &6<minutes>&d minutes before gifting again.
+        cooldown: 'You need to wait &6<minutes>&d minutes before gifting again.'
 check:
     self:
         message: 'You have &6<points>&d karma points.<NEWLINE>Current rank: <curgroupcolor><curgroup>&d. Next rank: <nextgroupcolor><nextgroup>'

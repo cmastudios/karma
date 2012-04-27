@@ -468,15 +468,7 @@ public class Karma extends JavaPlugin {
 
 			this.msg(
 					player,
-					"You begin your karmic journey with "
-							+ ChatColor.GREEN
-							+ initialKarma
-							+ ChatColor.GRAY
-							+ " karma points. Use "
-							+ ChatColor.GREEN
-							+ "/karma"
-							+ ChatColor.GRAY
-							+ " to check your karma. Gain enough karma points and you will be auto-promoted.");
+					config.getString("newplayer.message"));
 			this.getServer()
 					.getLogger()
 					.log(Level.INFO,
@@ -599,7 +591,8 @@ public class Karma extends JavaPlugin {
 	}
 
 	private String parseColor(String message) {
-		return message.replaceAll("&[0-9a-zA-Z]", "\u00A7$1");
+		return message.replaceAll("&([0-9a-zA-Z])", ChatColor.COLOR_CHAR
+				+ "$1");
 	}
 
 	private String getPlayerNextGroupString(KarmaPlayer karmaPlayer) {
