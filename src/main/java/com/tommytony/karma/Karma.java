@@ -91,7 +91,10 @@ public class Karma extends JavaPlugin {
 		} catch (ClassNotFoundException e) {
 			warenabled = false;
 			if (config.getBoolean("war.bonus")) {
-				this.getServer().getLogger().log(Level.WARNING, "Karma> war.bonus enabled in configuration but the War plugin was not found! Bonuses have been disabled.");
+				this.getServer()
+						.getLogger()
+						.log(Level.WARNING,
+								"Karma> war.bonus enabled in configuration but the War plugin was not found! Bonuses have been disabled.");
 			}
 		}
 
@@ -110,70 +113,76 @@ public class Karma extends JavaPlugin {
 		try {
 			if (command.getName().equals("karma")
 					|| command.getName().equals("k")) {
-				switch (com.tommytony.karma.Command.getCommand(args[0])) {
+				String cmd;
+				if (args.length < 1) {
+					cmd = "";
+				} else {
+					cmd = args[0];
+				}
+				switch (com.tommytony.karma.Command.getCommand(cmd)) {
 				case CHECK:
 					// Check their own karma
 					if (!(sender instanceof Player)) {
 						sender.sendMessage("This command cannot be used by console");
 						break;
 					}
-					KarmaPlayer karmaPlayer = this.players
+					KarmaPlayer karmaCheckPlayer = this.players
 							.get(((Player) sender).getName());
-					if (karmaPlayer != null) {
+					if (karmaCheckPlayer != null) {
 						this.msg(
 								sender,
 								config.getString("check.self.message")
 										.replace(
 												"<points>",
-												karmaPlayer.getKarmaPoints()
+												karmaCheckPlayer.getKarmaPoints()
 														+ "")
 										.replace(
 												"<curgroup>",
-												getPlayerGroupString(karmaPlayer))
+												getPlayerGroupString(karmaCheckPlayer))
 										.replace(
 												"<nextgroup>",
-												getPlayerNextGroupString(karmaPlayer))
+												getPlayerNextGroupString(karmaCheckPlayer))
 										.replace(
 												"<curgroupcolor>",
-												getPlayerGroupColor(karmaPlayer)
+												getPlayerGroupColor(karmaCheckPlayer)
 														.toString())
 										.replace(
 												"<nextgroupcolor>",
 												getPlayerNextGroupColor(
-														karmaPlayer).toString()));
+														karmaCheckPlayer).toString()));
 					}
+					karmaCheckPlayer = null;
 					break;
 				case CHECKOTHER:
 					// Check other players karma
-					List<Player> matches = this.getServer()
-							.matchPlayer(args[0]);
-					if (!matches.isEmpty()) {
-						Player playerTarget = matches.get(0);
-						KarmaPlayer karmaTarget = this.players.get(playerTarget
-								.getName());
-						if (karmaTarget != null) {
-							this.msg(
-									sender,
-									config.getString("check.others.message")
-											.replace("<player>",
-													playerTarget.getName())
-											.replace(
-													"<points>",
-													karmaTarget
-															.getKarmaPoints()
-															+ "")
-											.replace(
-													"<curgroupcolor>",
-													getPlayerGroupColor(
-															karmaTarget)
-															.toString()));
-						} else {
-							this.msg(sender,
-									config.getString("errors.noplayer"));
-						}
+					Player checkOtherTarget = this.getServer().getPlayer(
+							args[0]);
+					if (checkOtherTarget == null) {
+						this.msg(sender, config.getString("errors.noplayer"));
+						break;
+					}
+					KarmaPlayer karmaCheckOtherTarget = this.players.get(checkOtherTarget
+							.getName());
+					if (karmaCheckOtherTarget != null) {
+						this.msg(
+								sender,
+								config.getString("check.others.message")
+										.replace("<player>",
+												checkOtherTarget.getName())
+										.replace(
+												"<points>",
+												karmaCheckOtherTarget.getKarmaPoints()
+														+ "")
+										.replace(
+												"<curgroupcolor>",
+												getPlayerGroupColor(karmaCheckOtherTarget)
+														.toString()));
 					} else {
 						this.msg(sender, config.getString("errors.noplayer"));
 					}
+					checkOtherTarget = null;
+					karmaCheckOtherTarget = null;
+
 					break;
 				case RANKS:
 					String ranksString = config.getString("viewranks.prefix");
@@ -200,10 +209,11 @@ public class Karma extends JavaPlugin {
 								config.getString("errors.nopermission"));
 						break;
 					}
-					String target = args[1];
-
-					List<Player> matches1 = this.getServer()
-							.matchPlayer(target);
+					Player giftTarget = this.getServer().getPlayer(args[1]);
+					if (giftTarget == null) {
+						this.msg(sender, config.getString("errors.noplayer"));
+						break;
+					}
 					KarmaPlayer karmaGiver = null;
 					if (sender instanceof Player) {
 						karmaGiver = this.players.get(((Player) sender)
@@ -211,13 +221,12 @@ public class Karma extends JavaPlugin {
 					}
 
 					if (karmaGiver == null || karmaGiver.getKarmaPoints() > 0) {
-						Player playerTarget = matches1.get(0);
-						KarmaPlayer karmaTarget = this.getPlayers().get(
-								playerTarget.getName());
+						KarmaPlayer karmaGiftReceiver = this.getPlayers().get(
+								giftTarget.getName());
 
-						if (karmaTarget != null
+						if (karmaGiftReceiver != null
 								&& !sender.getName().equals(
-										playerTarget.getName())) {
+										giftTarget.getName())) {
 
 							String gifterName = "server";
 							if (karmaGiver != null) {
@@ -232,7 +241,7 @@ public class Karma extends JavaPlugin {
 													"gift.messages.togifter")
 													.replace(
 															"<player>",
-															karmaTarget
+															karmaGiftReceiver
 																	.getName())
 													.replace(
 															"<points>",
@@ -253,9 +262,10 @@ public class Karma extends JavaPlugin {
 								}
 							}
 
-							karmaTarget.addKarma(config.getInt("gift.amount"));
+							karmaGiftReceiver.addKarma(config
+									.getInt("gift.amount"));
 							this.msg(
-									playerTarget,
+									giftTarget,
 									config.getString("gift.messages.toreceiver")
 											.replace("<player>", gifterName)
 											.replace(
@@ -271,7 +281,7 @@ public class Karma extends JavaPlugin {
 													+ " gave "
 													+ config.getInt("gift.amount")
 													+ " karma to "
-													+ playerTarget.getName());
+													+ giftTarget.getName());
 
 							return true;
 						} else {
@@ -283,33 +293,31 @@ public class Karma extends JavaPlugin {
 					}
 					break;
 				case PROMOTE:
-					List<Player> matches2 = this.getServer().matchPlayer(
-							args[2]);
+					Player promoteTarget = this.getServer().getPlayer(args[1]);
 					KarmaGroup currentGroup = this.startGroup;
-					if (matches2.isEmpty()) {
+					if (promoteTarget == null) {
 						this.msg(sender,
 								config.getString("promote.messages.noplayer"));
 						break;
 					}
-					Player playerTarget = matches2.get(0);
-					KarmaPlayer karmaTarget = this.players.get(playerTarget
+					KarmaPlayer karmaPromoteTarget = this.players.get(promoteTarget
 							.getName());
-					if (karmaTarget == null)
+					if (karmaPromoteTarget == null)
 						break;
 					while (currentGroup != null) {
-						if (karmaTarget.getKarmaPoints() < currentGroup
+						if (karmaPromoteTarget.getKarmaPoints() < currentGroup
 								.getKarmaPoints()) {
 							if (sender.hasPermission("karma.promote."
 									+ currentGroup.getGroupName())) {
-								karmaTarget.addKarma(currentGroup
+								karmaPromoteTarget.addKarma(currentGroup
 										.getKarmaPoints()
-										- karmaTarget.getKarmaPoints());
+										- karmaPromoteTarget.getKarmaPoints());
 								this.msg(
-										playerTarget,
+										promoteTarget,
 										config.getString(
 												"promocommand.messages.promoted")
 												.replace("<player>",
-														playerTarget.getName())
+														promoteTarget.getName())
 												.replace(
 														"<group>",
 														currentGroup
@@ -348,6 +356,8 @@ public class Karma extends JavaPlugin {
 		} catch (Exception e) {
 			this.msg(sender, config.getString("errors.commandexception")
 					.replace("<exception>", e.toString()));
+			e.printStackTrace();
+			System.out.println("Karma> Error encountered.");
 		}
 
 		return true;
@@ -466,9 +476,7 @@ public class Karma extends JavaPlugin {
 			this.players.put(player.getName(), karmaPlayer);
 			this.db.put(karmaPlayer);
 
-			this.msg(
-					player,
-					config.getString("newplayer.message"));
+			this.msg(player, config.getString("newplayer.message"));
 			this.getServer()
 					.getLogger()
 					.log(Level.INFO,
@@ -583,16 +591,16 @@ public class Karma extends JavaPlugin {
 			for (String s : message.split("<NEWLINE>")) {
 				destination.sendMessage(parseColor(config.getString("prefix")
 						+ s));
-				return;
 			}
+			return;
 		}
 		destination
 				.sendMessage(parseColor(config.getString("prefix") + message));
 	}
 
 	private String parseColor(String message) {
-		return message.replaceAll("&([0-9a-zA-Z])", ChatColor.COLOR_CHAR
-				+ "$1");
+		return message
+				.replaceAll("&([0-9a-zA-Z])", ChatColor.COLOR_CHAR + "$1");
 	}
 
 	private String getPlayerNextGroupString(KarmaPlayer karmaPlayer) {
