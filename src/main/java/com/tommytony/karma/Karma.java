@@ -117,7 +117,7 @@ public class Karma extends JavaPlugin {
 				if (args.length < 1) {
 					cmd = "";
 				} else {
-					cmd = args[0];
+					cmd = args[0].toLowerCase();
 				}
 				switch (com.tommytony.karma.Command.getCommand(cmd)) {
 				case CHECK:

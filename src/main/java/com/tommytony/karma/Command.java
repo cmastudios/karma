@@ -10,7 +10,6 @@ public enum Command {
 	PROMOTE,
 	SET;
 	public static Command getCommand(String cmd) {
-		cmd = cmd.toLowerCase();
 		if (cmd == "ranks" || cmd == "rank" || cmd == "groups") {
 			return RANKS;
 		}
@@ -26,7 +25,7 @@ public enum Command {
 		if (cmd == "set") {
 			return SET;
 		}
-		if (cmd.length() > 1) {
+		if (cmd.length() == 1) {
 			return CHECKOTHER;
 		}
 		if (cmd.length() == 0) {

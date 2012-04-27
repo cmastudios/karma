@@ -60,6 +60,7 @@ public class KarmaParty implements Runnable {
 	}
 
 	private int getWarPlayingBonus(KarmaPlayer karmaPlayer, Player player) {
+		if (!karma.warenabled) return 0;
 		if (Warzone.getZoneByPlayerName(karmaPlayer.getName()) != null) {
 			if (random.nextInt(3) == 2) {
 				karma.msg(player, karma.config.getString("war.messages.player"));
@@ -70,6 +71,7 @@ public class KarmaParty implements Runnable {
 	}
 
 	private int getZonemakerBonus(KarmaPlayer karmaPlayer, Player player) {
+		if (!karma.warenabled) return 0;
 		for (Warzone zone : War.war.getWarzones()) {
 			for (String author : zone.getAuthors()) {
 				if (author.equals(karmaPlayer.getName()) && !zoneIsEmpty(zone)
