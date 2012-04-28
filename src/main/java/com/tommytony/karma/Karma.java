@@ -438,10 +438,10 @@ public class Karma extends JavaPlugin {
 									.getKarmaPoints())) {
 						// either doesn't have a next rank or can't beat the
 						// next rank's k points, we found the right rank
-						this.runCommand(config
-								.getString("promotion.command")
-								.replace("<player>", playerName)
+						for (String cmd : config.getStringList("promotion.commands")) {
+							this.runCommand(cmd.replace("<player>", playerName)
 								.replace("<group>", currentGroup.getGroupName()));
+						}
 						for (Player playerOnline : this.getServer()
 								.getOnlinePlayers()) {
 							this.msg(
@@ -536,9 +536,10 @@ public class Karma extends JavaPlugin {
 					&& after >= group.getKarmaPoints()
 					&& !playerForPromotion.hasPermission(perm)) {
 				// promotion
-				this.runCommand(config.getString("promotion.command")
-						.replace("<player>", playerName)
+				for (String cmd : config.getStringList("promotion.commands")) {
+					this.runCommand(cmd.replace("<player>", playerName)
 						.replace("<group>", group.getGroupName()));
+				}
 				for (Player player : this.getServer().getOnlinePlayers()) {
 					this.msg(
 							player,
@@ -574,9 +575,10 @@ public class Karma extends JavaPlugin {
 							// rank
 				if (playerForDemotion.hasPermission(perm)) {
 					// demotion
-					this.runCommand(config.getString("demotion.command")
-							.replace("<player>", playerName)
+					for (String cmd : config.getStringList("promotion.commands")) {
+						this.runCommand(cmd.replace("<player>", playerName)
 							.replace("<group>", group.getGroupName()));
+					}
 					for (Player player : this.getServer().getOnlinePlayers()) {
 						this.msg(
 								player,

@@ -42,45 +42,49 @@ party:
     points: 1
     messages:
         #            \'/ If you need to use a ' in a string, type another ' after it so YAML knows you are not just ending the string.     
-        announce: 'It''s a &6/karma&d party!'
-        pointgain: 'You gain &6<points>&d karma point(s).'
-        afknogain: 'You lost out on &6<points>&d karma point(s) because you were AFK.'
+        announce: 'It''s a &a/karma&d party!'
+        pointgain: 'You gain &a<points>&d karma point(s).'
+        afknogain: 'You lost out on &a<points>&d karma point(s) because you were AFK.'
 promotion:
-    command: 'manuadd <player> <group><NEWLINE>mansave'
-    message: 'Good karma! &6<player>&d promoted to <groupcolor><group>&d.'
+    commands: 
+    - 'manuadd <player> <group>'
+    - 'mansave'
+    message: 'Good karma! &a<player>&d promoted to <groupcolor><group>&d.'
 demotion:
-    command: 'manuadd <player> <group><NEWLINE>mansave'
-    message: 'Bad karma. &6<player>&d demoted to <groupcolor><group>&d.'
+    commands: 
+    - 'manuadd <player> <group>'
+    - 'mansave'
+    message: 'Bad karma. &a<player>&d demoted to <groupcolor><group>&d.'
 
 gift:
     amount: 1
     messages:
-        togifter: 'You gave &6<player> <points>&d karma. How generous!'
-        toreceiver: '&6<player>&d gave you &6<points>&d karma.'
-        cooldown: 'You need to wait &6<minutes>&d minutes before gifting again.'
+        togifter: 'You gave &a<player> <points>&d karma. How generous!'
+        toreceiver: '&a<player>&d gave you &a<points>&d karma.'
+        cooldown: 'You need to wait &a<minutes>&d minutes before gifting again.'
 check:
     self:
-        message: 'You have &6<points>&d karma points.<NEWLINE>Current rank: <curgroupcolor><curgroup>&d. Next rank: <nextgroupcolor><nextgroup>'
+        message: 'You have &a<points>&d karma points.<NEWLINE>Current rank: <curgroupcolor><curgroup>&d. Next rank: <nextgroupcolor><nextgroup>'
     others:
-        message: '<curgroupcolor><player>&d has &6<points>&d karma points.'
+        message: '<curgroupcolor><player>&d has &a<points>&d karma points.'
 promocommand:
     messages:
         highest: '&cThat player is already the highest rank.'
-        promoted: '&6<player>&d promoted to &6<group>&d.'
+        promoted: '&a<player>&d promoted to &a<group>&d.'
 newplayer:
-    message: 'This server supports automatic ranking.<NEWLINE>Use &6/karma help&d for more information.'
+    message: 'This server supports automatic ranking.<NEWLINE>Use &a/karma help&d for more information.'
 viewranks:
     prefix: 'Ranks: '
 help:
-- 'Use &6/karma&d to check your karma points.' 
-- 'Use &6/karma <person>&d to see points of others.'
-- 'Use &6/karma gift <person>&d to give karma to another player.' 
-- 'Use &6/karma ranks&d to view earnable ranks.' 
-- 'Use &6/k&d as an alias.'
+- 'Use &a/karma&d to check your karma points.' 
+- 'Use &a/karma <person>&d to see points of others.'
+- 'Use &a/karma gift <person>&d to give karma to another player.' 
+- 'Use &a/karma ranks&d to view earnable ranks.' 
+- 'Use &a/k&d as an alias.'
 errors:
     noplayer: '&cCannot find the player'
     nopermission: '&cYou do not have permission'
-    unknowncommand: '&cUnknown command. Use &6/karma help&d.'
+    unknowncommand: '&cUnknown command. Use &a/karma help&d.'
     commandexception: '&cException <exception> occured while processing your command.'
 war:
     bonus: false
