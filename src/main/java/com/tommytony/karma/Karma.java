@@ -329,6 +329,29 @@ public class Karma extends JavaPlugin {
 								Integer.parseInt(args[2]));
 					}
 					return true;
+				}				
+                                if (args[0].equalsIgnoreCase("add")) {
+					if (args.length < 3) {
+						this.msg(sender, config.getString("errors.badargs"));
+						return true;
+					}
+
+					try {
+						Integer.parseInt(args[2]);
+					} catch (NumberFormatException e) {
+						sender.sendMessage(ChatColor.RED
+								+ "The third argument must be an integer!");
+						return true;
+					}
+					List<Player> matches3 = this.getServer().matchPlayer(
+							args[1]);
+					if (!matches3.isEmpty() && Integer.parseInt(args[2]) >= 0
+							&& sender.hasPermission("karma.set")) {
+                                                KarmaPlayer playerToAddKarma = this.players.get(matches3.get(0).getName());
+						return this.setAmount(matches3,
+								Integer.parseInt(args[2]) + playerToAddKarma.getKarmaPoints());
+					}
+					return true;
 				}
 				if (args.length == 1) {
 					// Check other players karma
