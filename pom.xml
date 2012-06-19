@@ -4,7 +4,7 @@
   <artifactId>karma</artifactId>
   <version>0.2-SNAPSHOT</version>
   <name>Karma</name>
-  <url>http://github.com/taoneill/karma/</url>
+  <url>http://cmastudios.me/wiki/Karma</url>
   <repositories>
     <repository>
         <id>bukkit-repo</id>
