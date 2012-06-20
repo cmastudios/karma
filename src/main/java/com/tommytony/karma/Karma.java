@@ -20,9 +20,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Karma extends JavaPlugin {
 
-	private Map<String, KarmaPlayer> players;
-	private Database db;
-	private KarmaGroup startGroup;
+	protected Map<String, KarmaPlayer> players;
+	protected Database db;
+	protected KarmaGroup startGroup;
 	public FileConfiguration config;
 	private Random random = new Random();
 	public boolean warenabled = false;
@@ -477,11 +477,26 @@ public class Karma extends JavaPlugin {
 													"<groupcolor>",
 													currentGroup.getChatColor()
 															.toString()));
-						}
-					}
+						}//end for
+
+					}//end if
 
 					currentGroup = currentGroup.getNext();
-				}
+				}//end while	
+                                // Check if a player has enough karma points for his rank, if not, add them
+                                // This allows easy installation of karma: no having to change preexisting users' karma to their rank's karma	
+                                currentGroup = this.startGroup;		
+                                while (currentGroup != null) {
+					if (karmaPlayer.getKarmaPoints() < currentGroup.getKarmaPoints()
+					    && player.hasPermission("karma." + currentGroup.getGroupName())) {
+
+						this.setAmount(player, currentGroup.getKarmaPoints());
+						
+
+					}//end if
+
+					currentGroup = currentGroup.getNext();
+				}//end while
 
 				// check for last activity, remove one karma point per day off
 				long gone = System.currentTimeMillis()
@@ -663,7 +678,11 @@ public class Karma extends JavaPlugin {
 		KarmaGroup lastGroup = null; // first group is recruit
 		while (group != null) {
 			String perm = "karma." + group.getGroupName();
-			if (!player.hasPermission(perm)) {
+			if (!player.hasPermission(perm) && group == startGroup) {
+                                this.getServer().getLogger().severe(karmaPlayer.getName() + " does not have permissions for the start group! Permissions configured incorrectly (Did you forget inheritance?).");
+				return "PERMISSIONS CONFIGURED INCORRECTLY";
+			}
+                        if (!player.hasPermission(perm)) {
 				return lastGroup.getChatColor() + lastGroup.getGroupName() + " (" + ChatColor.YELLOW
 						+ lastGroup.getKarmaPoints() + ChatColor.GRAY + ")";
 			}
@@ -682,6 +701,7 @@ public class Karma extends JavaPlugin {
 		KarmaGroup group = this.startGroup;
 		while (group != null) {
 			String perm = "karma." + group.getGroupName();
+
 			if (!player.hasPermission(perm)) {
 				return group.getChatColor();
 			}
@@ -696,6 +716,10 @@ public class Karma extends JavaPlugin {
 		KarmaGroup lastGroup = null; // first group is recruit
 		while (group != null) {
 			String perm = "karma." + group.getGroupName();
+			if (!player.hasPermission(perm) && group == startGroup) {
+
+				return ChatColor.RED;
+			}
 			if (!player.hasPermission(perm)) {
 				return lastGroup.getChatColor();
 			}
