@@ -613,7 +613,7 @@ public class Karma extends JavaPlugin {
 							// rank
 				if (playerForDemotion.hasPermission(perm)) {
 					// demotion
-					for (String cmd : config.getStringList("promotion.commands")) {
+					for (String cmd : config.getStringList("demotion.commands")) {
 						this.runCommand(cmd.replace("<player>", playerName)
 							.replace("<group>", group.getGroupName()));
 					}
