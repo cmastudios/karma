@@ -4,16 +4,15 @@ import org.bukkit.entity.Player;
 
 public class LoadPlayers implements Runnable {
 
-	private final Karma karma;
+    private final Karma karma;
 
-	public LoadPlayers(Karma karma) {
-		this.karma = karma;
-	}
+    public LoadPlayers(Karma karma) {
+        this.karma = karma;
+    }
 
-	public void run() {
-		for (Player player : this.karma.getServer().getOnlinePlayers()) {
-        	this.karma.loadOrCreateKarmaPlayer(player);
+    public void run() {
+        for (Player player : this.karma.server.getOnlinePlayers()) {
+            this.karma.loadOrCreateKarmaPlayer(player);
         }
-	}
-
+    }
 }
