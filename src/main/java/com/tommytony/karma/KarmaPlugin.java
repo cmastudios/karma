@@ -26,7 +26,6 @@ public class KarmaPlugin extends JavaPlugin {
         // Init data
         karma.players = new HashMap<String, KarmaPlayer>();
         karma.db = new Database(karma);
-        karma.db.initialize();
 
         PluginManager manager = this.getServer().getPluginManager();
 
@@ -55,6 +54,10 @@ public class KarmaPlugin extends JavaPlugin {
         manager.registerEvents(worldListener, this);
 
         KarmaPlayerListener playerListener = new KarmaPlayerListener(karma);
+        playerListener.pingOnPlayerChat = karma.config.getBoolean("afk.triggers.chat");
+        playerListener.pingOnPlayerCommand = karma.config.getBoolean("afk.triggers.command");
+        playerListener.pingOnPlayerBuild = karma.config.getBoolean("afk.triggers.build");
+        playerListener.pingOnPlayerMove = karma.config.getBoolean("afk.triggers.move");
         manager.registerEvents(playerListener, this);
 
         // Load online players

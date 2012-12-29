@@ -2,7 +2,6 @@ package com.tommytony.karma;
 
 import java.io.File;
 import java.sql.*;
-import java.util.logging.Level;
 
 public class Database {
 
@@ -10,6 +9,34 @@ public class Database {
 
     public Database(Karma karmaPlugin) {
         this.karma = karmaPlugin;
+        if (new File("plugins/Karma").mkdir()) {
+            this.karma.log.info("Creating files...");
+        }
+        if (karma.config.getBoolean("mysql.enabled")) {
+            sqlite = false;
+        }
+        if (this.sqlite()) {
+            try {
+                Connection connection = this.getConnection();
+                Statement statement = connection.createStatement();
+                statement.executeUpdate("create table if not exists players (name text, karma numeric, lastactive numeric)");
+
+                try {
+                    Statement alterStatement = connection.createStatement();
+                    alterStatement.executeUpdate("alter table players add column lastgift numeric");
+                } catch (SQLException e) {
+                }
+
+                this.addColumn(connection, "lastgift numeric");
+                this.addColumn(connection, "lastprize numeric");
+
+                statement.close();
+                connection.close();
+            } catch (SQLException e) {
+                this.karma.log.warning("Error while intilializing database. " + e.toString());
+            }
+        }
+
     }
 
     public boolean exists(String playerName) {
@@ -88,34 +115,6 @@ public class Database {
         }
     }
 
-    public void initialize() {
-        if (new File("plugins/Karma").mkdir()) {
-            this.karma.log.info("Creating files...");
-        }
-
-        if (this.sqlite()) {
-            try {
-                Connection connection = this.getConnection();
-                Statement statement = connection.createStatement();
-                statement.executeUpdate("create table if not exists players (name text, karma numeric, lastactive numeric)");
-
-                try {
-                    Statement alterStatement = connection.createStatement();
-                    alterStatement.executeUpdate("alter table players add column lastgift numeric");
-                } catch (SQLException e) {
-                }
-
-                this.addColumn(connection, "lastgift numeric");
-                this.addColumn(connection, "lastprize numeric");
-
-                statement.close();
-                connection.close();
-            } catch (SQLException e) {
-                this.karma.log.warning("Error while intilializing database. " + e.toString());
-            }
-        }
-    }
-
     private void addColumn(Connection connection, String newColumn) {
         boolean updatedSchema = true;
         try {
@@ -142,6 +141,15 @@ public class Database {
     private boolean sqlite = true; // false for mysql
 
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection("jdbc:sqlite:plugins/Karma/karma.db");
+        if (sqlite) {
+            return DriverManager.getConnection("jdbc:sqlite:plugins/Karma/"
+                    + karma.config.getString("sqlite.database"));
+        } else {
+            return DriverManager.getConnection("jdbc:mysql://"
+                    + karma.config.getString("mysql.host")
+                    + "/" + karma.config.getString("mysql.database")
+                    + "?user=" + karma.config.getString("mysql.username")
+                    + "&password=" + karma.config.getString("mysql.password"));
+        }
     }
 }

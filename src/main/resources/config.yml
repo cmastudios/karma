@@ -92,7 +92,7 @@ war:
         creator: 'Thanks for making warzones!'
         player: 'Thanks for playing War!'
 sqlite:
-    database: 'jdbc:sqlite:plugins/Karma/karma.db'
+    database: karma.db
 mysql:
     enabled: false
     host: localhost
@@ -104,5 +104,6 @@ afk:
         chat: true
         command: true
         build: true
-        move: true
+# Enabling move can drastically decrease server performance
+        move: false
         
