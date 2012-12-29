@@ -91,4 +91,18 @@ war:
     messages:
         creator: 'Thanks for making warzones!'
         player: 'Thanks for playing War!'
+sqlite:
+    database: 'jdbc:sqlite:plugins/Karma/karma.db'
+mysql:
+    enabled: false
+    host: localhost
+    username: root
+    password: 12345
+    database: karma
+afk:
+    triggers:
+        chat: true
+        command: true
+        build: true
+        move: true
         
