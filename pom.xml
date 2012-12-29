@@ -6,6 +6,10 @@
     <version>0.3</version>
     <name>Karma</name>
     <url>http://cmastudios.me/wiki/Karma</url>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <repositories>
         <repository>
             <id>bukkit-repo</id>
