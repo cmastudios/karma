@@ -211,7 +211,7 @@ public class Karma {
         }
     }
 
-    private String getPlayerNextGroupString(KarmaPlayer karmaPlayer) {
+    public String getPlayerNextGroupString(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = startGroup;
         while (group != null) {
@@ -225,7 +225,7 @@ public class Karma {
         return "none";
     }
 
-    private String getPlayerGroupString(KarmaPlayer karmaPlayer) {
+    public String getPlayerGroupString(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = startGroup;
         KarmaGroup lastGroup = null; // first group is recruit
@@ -249,7 +249,7 @@ public class Karma {
         return "none";
     }
 
-    private ChatColor getPlayerNextGroupColor(KarmaPlayer karmaPlayer) {
+    public ChatColor getPlayerNextGroupColor(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = startGroup;
         while (group != null) {
@@ -263,7 +263,7 @@ public class Karma {
         return ChatColor.WHITE;
     }
 
-    private ChatColor getPlayerGroupColor(KarmaPlayer karmaPlayer) {
+    public ChatColor getPlayerGroupColor(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = startGroup;
         KarmaGroup lastGroup = null; // first group is recruit
