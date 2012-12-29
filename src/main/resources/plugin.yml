@@ -1,5 +1,5 @@
-name: Karma
-version: 0.2
+name: ${project.name}
+version: ${project.version}
 description: Karmic auto-ranking
 author: tommytony
 authors: [cmastudios]
