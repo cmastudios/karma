@@ -19,16 +19,13 @@ public class Database {
             try {
                 Connection connection = this.getConnection();
                 Statement statement = connection.createStatement();
+                // (name, karma, lastactive, lastgift, lastprize, track)
                 statement.executeUpdate("create table if not exists players (name text, karma numeric, lastactive numeric)");
 
-                try {
-                    Statement alterStatement = connection.createStatement();
-                    alterStatement.executeUpdate("alter table players add column lastgift numeric");
-                } catch (SQLException e) {
-                }
-
                 this.addColumn(connection, "lastgift numeric");
+                // Shakes fist at sqlite no drop column
                 this.addColumn(connection, "lastprize numeric");
+                this.addColumn(connection, "track text");
 
                 statement.close();
                 connection.close();
@@ -65,7 +62,11 @@ public class Database {
                 Statement stat = conn.createStatement();
                 ResultSet result = stat.executeQuery("select * from players where name='" + playerName + "'");
                 if (result.next()) {
-                    karmaPlayer = new KarmaPlayer(this.karma, playerName, result.getInt("karma"), result.getLong("lastactive"), result.getLong("lastgift"));
+                    karmaPlayer = new KarmaPlayer(this.karma, playerName, 
+                            result.getInt("karma"), 
+                            result.getLong("lastactive"), 
+                            result.getLong("lastgift"), 
+                            karma.getTrack(result.getString("track")));
                 }
                 result.close();
                 stat.close();
@@ -85,16 +86,36 @@ public class Database {
                 Statement stat = conn.createStatement();
                 if (exists) {
                     // update
-                    stat.executeUpdate(
-                            "update players set karma=" + karmaPlayer.getKarmaPoints()
-                            + ", lastactive=" + karmaPlayer.getLastActivityTime()
-                            + ", lastgift=" + karmaPlayer.getLastGiftTime()
-                            + " where name='" + karmaPlayer.getName() + "'");
+// Tom's bad code                   
+//                    stat.executeUpdate(
+//                            "update players set karma=" + karmaPlayer.getKarmaPoints()
+//                            + ", lastactive=" + karmaPlayer.getLastActivityTime()
+//                            + ", lastgift=" + karmaPlayer.getLastGiftTime()
+//                            + " where name='" + karmaPlayer.getName() + "'");
+                    // Cma's good code
+                    PreparedStatement pstmt = conn.prepareStatement(
+                    "UPDATE players SET karma = ?, lastactive = ?, lastgift = ?, track = ? WHERE name = ?");
+                    pstmt.setInt(1, karmaPlayer.getKarmaPoints());
+                    pstmt.setLong(2, karmaPlayer.getLastActivityTime());
+                    pstmt.setLong(3, karmaPlayer.getLastGiftTime());
+                    pstmt.setString(4, karmaPlayer.getTrack().getName());
+                    pstmt.setString(5, karmaPlayer.getName());
+                    pstmt.executeUpdate();
+                    // See, much better!
                 } else {
                     // insert
-                    stat.executeUpdate(
-                            "insert into players values ('" + karmaPlayer.getName() + "', "
-                            + karmaPlayer.getKarmaPoints() + ", " + karmaPlayer.getLastActivityTime() + ", " + karmaPlayer.getLastGiftTime() + ", 0)");
+                    PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO players (name, karma, lastactive, lastgift, track) VALUES (?, ?, ?, ?, ?)");
+                    pstmt.setString(1, karmaPlayer.getName());
+                    pstmt.setInt(2, karmaPlayer.getKarmaPoints());
+                    pstmt.setLong(3, karmaPlayer.getLastActivityTime());
+                    pstmt.setLong(4, karmaPlayer.getLastGiftTime());
+                    pstmt.setString(5, karmaPlayer.getTrack().getName());
+                    pstmt.executeUpdate();
+
+//                    stat.executeUpdate(
+//                            "insert into players values ('" + karmaPlayer.getName() + "', "
+//                            + karmaPlayer.getKarmaPoints() + ", " + karmaPlayer.getLastActivityTime() + ", " + karmaPlayer.getLastGiftTime() + ", 0)");
                 }
                 stat.close();
                 conn.close();

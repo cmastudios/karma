@@ -12,29 +12,43 @@
 # karma.set: Allow access to change the raw amount of
 #   karma a player has (like to reward them with karma)
 #
-# PUT GROUPS IN DECREASING ORDER
+# -PUT GROUPS IN DECREASING ORDER- Since 0.3, it doesn't matter :D
 
 prefix: '&5Karma>&d '
-groups:
-    greybeard:
-        color: '2'
-        points: 2000
-    moderator:
-        color: '9'
-        points: 1000
-    minimod:
-        color: b
-        points: 500
-    zonemaker:
-        color: e
-        points: 100
-    builder:
-        color: '7'
-        points: 10
-    recruit:
-        color: d
-        points: 0
-        first: true
+tracks:
+    default:
+        recruit:
+            color: d
+            points: 0
+        builder:
+            color: '7'
+            points: 10
+        zonemaker:
+            color: e
+            points: 100
+        zoneengineer:
+            color: f
+            points: 500
+        zonemaster:
+            color: f
+            points: 1000
+    moderation:
+        minimod:
+            color: b
+            points: 500
+        moderator:
+            color: '9'
+            points: 1000
+        megamod:
+            color: f
+            points: 2000
+    administration:
+        caretaker:
+            color: f
+            points: 10000
+        administrator:
+            color: c
+            points: 50000
 party:
     time:
         minimum: 10
@@ -50,6 +64,7 @@ promotion:
     - 'manuadd <player> <group>'
     - 'mansave'
     message: 'Good karma! &a<player>&d promoted to <groupcolor><group>&d.'
+    eligibleMessage: 'You are now eligible for the group `<groupcolor><group>'' in track `<track>''. Contact the admins for more information.'
 demotion:
     commands: 
     - 'manuadd <player> <group>'

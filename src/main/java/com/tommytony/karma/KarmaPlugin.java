@@ -23,15 +23,13 @@ public class KarmaPlugin extends JavaPlugin {
         karma = new Karma();
         karma.server = getServer();
         karma.log = getLogger();
-        // Init data
-        karma.players = new HashMap<String, KarmaPlayer>();
-        karma.db = new Database(karma);
 
         PluginManager manager = this.getServer().getPluginManager();
 
         // Setup config
         saveDefaultConfig();
         karma.config = getConfig();
+        
         try {
             karma.config.load(new File("plugins/Karma/config.yml"));
         } catch (IOException e) {
@@ -44,9 +42,12 @@ public class KarmaPlugin extends JavaPlugin {
             manager.disablePlugin(this);
             return;
         }
+        // Init data
+        karma.players = new HashMap<String, KarmaPlayer>();
+        karma.db = new Database(karma);
 
         // Load karma groups
-        karma.loadKarmaGroups();
+        karma.loadTracks();
 
         // Register events
 

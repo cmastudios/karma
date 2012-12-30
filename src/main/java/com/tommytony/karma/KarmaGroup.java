@@ -2,32 +2,46 @@ package com.tommytony.karma;
 
 import org.bukkit.ChatColor;
 
-public class KarmaGroup {
-	private final String groupName;
-	private final int karmaPoints;
-	private final KarmaGroup next;
-	private final ChatColor chatColor;
+public class KarmaGroup implements Comparable {
 
-	public KarmaGroup(String groupName, int karmaPoints, KarmaGroup next, ChatColor color) {
-		this.groupName = groupName;
-		this.karmaPoints = karmaPoints;
-		this.next = next;
-		this.chatColor = color;
-	}
+    private final String groupName;
+    private final int karmaPoints;
+    private final ChatColor chatColor;
 
-	public int getKarmaPoints() {
-		return karmaPoints;
-	}
+    public KarmaGroup(String groupName, int karmaPoints, ChatColor color) {
+        this.groupName = groupName;
+        this.karmaPoints = karmaPoints;
+        this.chatColor = color;
+    }
 
-	public String getGroupName() {
-		return groupName;
-	}
+    public int getKarmaPoints() {
+        return karmaPoints;
+    }
 
-	public KarmaGroup getNext() {
-		return next;
-	}
+    public String getGroupName() {
+        return groupName;
+    }
 
-	public ChatColor getChatColor() {
-		return chatColor;
-	}
+    public ChatColor getChatColor() {
+        return chatColor;
+    }
+
+    public int compareTo(Object o) {
+        if (!(o instanceof KarmaGroup)) {
+            throw new ClassCastException(this.getClass().getCanonicalName() + 
+                    " is not comparable to a " + o.getClass().getCanonicalName()
+                    );
+        }
+        KarmaGroup group2 = (KarmaGroup) o;
+        if (this.getKarmaPoints() < group2.getKarmaPoints()) {
+            return -1;
+        }
+        if (this.getKarmaPoints() == group2.getKarmaPoints()) {
+            return 0;
+        }
+        if (this.getKarmaPoints() > group2.getKarmaPoints()) {
+            return 1;
+        }
+        return 0;
+    }
 }

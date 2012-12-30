@@ -5,7 +5,7 @@ author: tommytony
 authors: [cmastudios]
 website: https://github.com/taoneill/karma
 
-main: com.tommytony.karma.Karma
+main: com.tommytony.karma.KarmaPlugin
 
 commands:
   karma:

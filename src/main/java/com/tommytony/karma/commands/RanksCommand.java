@@ -2,6 +2,7 @@ package com.tommytony.karma.commands;
 
 import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaGroup;
+import com.tommytony.karma.KarmaTrack;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,19 +17,23 @@ public class RanksCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        String ranksString = karma.config.getString("viewranks.prefix");
-        KarmaGroup group = karma.startGroup;
-        while (group != null) {
-            ranksString += group.getChatColor() + group.getGroupName() + ChatColor.GRAY + "("
-                    + ChatColor.YELLOW + group.getKarmaPoints()
-                    + ChatColor.GRAY + ")";
-            if (group.getNext() != null) {
-                ranksString += ChatColor.WHITE + " -> "
-                        + ChatColor.GRAY;
+        for (KarmaTrack track : karma.tracks) {
+            KarmaGroup group = track.getFirstGroup();
+            StringBuilder ranksString = new StringBuilder();
+            ranksString.append(track.getName()).append(": ");
+            while (group != null) {
+                ranksString.append(group.getChatColor()).append(group.getGroupName())
+                        .append(ChatColor.GRAY).append("(")
+                        .append(ChatColor.YELLOW).append(group.getKarmaPoints())
+                        .append(ChatColor.GRAY).append(")");
+                if (track.getNextGroup(group) != null) {
+                    ranksString.append(ChatColor.WHITE).append(" -> ")
+                            .append(ChatColor.GRAY);
+                }
+                group = track.getNextGroup(group);
             }
-            group = group.getNext();
+            karma.msg(sender, ranksString.toString());
         }
-        karma.msg(sender, ranksString);
         return true;
     }
 }

@@ -22,13 +22,14 @@ public class PromoteCommand implements CommandExecutor {
             return true;
         }
         Player promoteTarget = karma.server.getPlayer(args[1]);
-        KarmaGroup currentGroup = karma.startGroup;
-        if (promoteTarget == null) {
-            karma.msg(sender, karma.config.getString("promote.messages.noplayer"));
-            return true;
-        }
         KarmaPlayer karmaPromoteTarget = karma.players.get(promoteTarget.getName());
         if (karmaPromoteTarget == null) {
+            return true;
+        }
+
+        KarmaGroup currentGroup = karmaPromoteTarget.getTrack().getFirstGroup();
+        if (promoteTarget == null) {
+            karma.msg(sender, karma.config.getString("promote.messages.noplayer"));
             return true;
         }
         while (currentGroup != null) {
@@ -47,7 +48,7 @@ public class PromoteCommand implements CommandExecutor {
                 }
 
             }
-            currentGroup = currentGroup.getNext();
+            currentGroup = karmaPromoteTarget.getTrack().getNextGroup(currentGroup);
         }
         return false;
     }

@@ -7,20 +7,22 @@ public class KarmaPlayer {
     private int karmaPoints;
     private long lastActivityTime;
     private long lastGift;
+    private KarmaTrack track;
 
-    public KarmaPlayer(Karma karma, String name, int karmaPoints, long lastActivityTime, long lastGift) {
+    public KarmaPlayer(Karma karma, String name, int karmaPoints, long lastActivityTime, long lastGift, KarmaTrack track) {
         this.karma = karma;
         this.name = name;
         this.karmaPoints = karmaPoints;
         this.lastActivityTime = lastActivityTime;
         this.lastGift = lastGift;
+        this.track = track;
     }
 
     public void addKarma(int pointsToAdd) {
         if (pointsToAdd > 0) {
             int before = this.karmaPoints;
             this.karmaPoints += pointsToAdd;
-            this.karma.checkForPromotion(name, before, this.karmaPoints);
+            this.karma.checkForPromotion(this, before, this.karmaPoints);
             this.karma.getKarmaDatabase().put(this);
         }
     }
@@ -40,7 +42,7 @@ public class KarmaPlayer {
         if (pointsToRemove > 0) {
             int before = this.karmaPoints;
             this.karmaPoints -= pointsToRemove;
-            this.karma.checkForDemotion(name, before, this.karmaPoints, automatic);
+            this.karma.checkForDemotion(this, before, this.karmaPoints, automatic);
             this.karma.getKarmaDatabase().put(this);
         }
     }
@@ -72,5 +74,19 @@ public class KarmaPlayer {
     public boolean canGift() {
         long since = System.currentTimeMillis() - getLastGiftTime();
         return since > 3600 * 1000;
+    }
+
+    /**
+     * @return the track
+     */
+    public KarmaTrack getTrack() {
+        return track;
+    }
+
+    /**
+     * @param track the track to set
+     */
+    public void setTrack(KarmaTrack track) {
+        this.track = track;
     }
 }
