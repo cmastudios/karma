@@ -13,12 +13,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class KarmaPlugin extends JavaPlugin {
 
     protected Karma karma;
+    
+    //Called when bukkit disables plugin
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(this);
         karma.db.putAll();
         karma.players.clear();
     }
 
+    //Caled when bukkit enables plugin
     public void onEnable() {
         karma = new Karma();
         karma.server = getServer();
@@ -81,7 +84,8 @@ public class KarmaPlugin extends JavaPlugin {
         this.getServer().getScheduler().runTaskLater(this, new KarmaParty(karma),
                 karma.getNextRandomKarmaPartyDelay());
     }
-
+    
+    //called when a command is recieved by the server
     @Override
     public boolean onCommand(CommandSender sender, Command cmd,
             String alias, String[] args) {
