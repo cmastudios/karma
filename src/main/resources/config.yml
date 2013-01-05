@@ -27,10 +27,10 @@ tracks:
             color: e
             points: 100
         zoneengineer:
-            color: f
+            color: '6'
             points: 500
         zonemaster:
-            color: f
+            color: a
             points: 1000
     moderation:
         minimod:
@@ -40,11 +40,11 @@ tracks:
             color: '9'
             points: 1000
         megamod:
-            color: f
+            color: '1'
             points: 2000
     administration:
         caretaker:
-            color: f
+            color: '2'
             points: 10000
         administrator:
             color: c
