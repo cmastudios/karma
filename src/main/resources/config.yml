@@ -96,6 +96,12 @@ help:
 - 'Use &a/karma gift <person>&d to give karma to another player.' 
 - 'Use &a/karma ranks&d to view earnable ranks.' 
 - 'Use &a/k&d as an alias.'
+admin-help:
+- '&cAdministration commands:'
+- 'Use &a/karma set <person> <amount>&d to set a player''s karma.'
+- 'Use &a/karma add <person> <amount>&d to add to a player''s karma.'
+- 'Use &a/karma promote <person>&d to promote a player.'
+- 'Use &a/karma track <person> <track>&d to set a player''s track.'
 errors:
     noplayer: '&cCannot find the player'
     nopermission: '&cYou do not have permission'

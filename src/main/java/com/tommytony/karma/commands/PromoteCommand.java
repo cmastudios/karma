@@ -34,7 +34,8 @@ public class PromoteCommand implements CommandExecutor {
         }
         while (currentGroup != null) {
             if (karmaPromoteTarget.getKarmaPoints() < currentGroup.getKarmaPoints()) {
-                if (sender.hasPermission("karma.promote." + currentGroup.getGroupName())) {
+                if (sender.hasPermission("karma.promote." + currentGroup.getGroupName())
+                        || sender.hasPermission("karma.promote.*")) {
                     karmaPromoteTarget.addKarma(currentGroup.getKarmaPoints() - karmaPromoteTarget.getKarmaPoints());
                     karma.msg(
                             promoteTarget,

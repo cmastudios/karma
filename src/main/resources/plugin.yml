@@ -13,3 +13,14 @@ commands:
     usage: /<command> help
     aliases: k
 permissions:
+    karma.promote.*:
+        description: Allow promotion to any rank
+    karma.track.*:
+        description: Allow changing players to any track
+    karma.gift:
+        description: Allow gifting karma to others
+    karma.set:
+        description: Allow changing player's karma
+    karma.help:
+        description: Allow viewing of admin/all help
+
