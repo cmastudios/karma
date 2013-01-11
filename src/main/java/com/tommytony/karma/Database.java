@@ -37,21 +37,7 @@ public class Database {
     }
 
     public boolean exists(String playerName) {
-        boolean exists = false;
-        if (this.sqlite()) {
-            try {
-                Connection conn = this.getConnection();
-                Statement stat = conn.createStatement();
-                ResultSet result = stat.executeQuery("select name from players where name='" + playerName + "'");
-                exists = result.next();
-                result.close();
-                stat.close();
-                conn.close();
-            } catch (SQLException e) {
-                this.karma.log.warning("Error while checking for existence of " + playerName + ". " + e.toString());
-            }
-        }
-        return exists;
+        return get(playerName) != null ? true : false;
     }
 
     public KarmaPlayer get(String playerName) {
@@ -59,17 +45,22 @@ public class Database {
         if (this.sqlite()) {
             try {
                 Connection conn = this.getConnection();
-                Statement stat = conn.createStatement();
-                ResultSet result = stat.executeQuery("select * from players where name='" + playerName + "'");
+                PreparedStatement stmt = conn.prepareStatement("SELECT * FROM players WHERE name = ?");
+                stmt.setString(1, playerName);
+                ResultSet result = stmt.executeQuery();
                 if (result.next()) {
+                    KarmaTrack track = karma.getTrack(result.getString("track"));
+                    if (track == null) {
+                        track = karma.getDefaultTrack();
+                    }
                     karmaPlayer = new KarmaPlayer(this.karma, playerName, 
                             result.getInt("karma"), 
                             result.getLong("lastactive"), 
                             result.getLong("lastgift"), 
-                            karma.getTrack(result.getString("track")));
+                            track);
                 }
                 result.close();
-                stat.close();
+                stmt.close();
                 conn.close();
             } catch (SQLException e) {
                 this.karma.log.warning("Error while getting " + playerName + ". " + e.toString());
