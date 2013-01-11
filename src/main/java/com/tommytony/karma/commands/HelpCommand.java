@@ -14,13 +14,9 @@ public class HelpCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        for (String line : karma.config.getStringList("help")) {
-            karma.msg(sender, line);
-        }
+        karma.msg(sender, karma.config.getString("help"));
         if (sender.hasPermission("karma.help")) {
-            for (String line : karma.config.getStringList("admin-help")) {
-                karma.msg(sender, line);
-            }
+            karma.msg(sender, karma.config.getString("admin-help"));
         }
         return true;
     }

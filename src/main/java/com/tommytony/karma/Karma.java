@@ -68,12 +68,10 @@ public class Karma {
                             && !(karmaPlayer.getTrack().getNextGroup(currentGroup) != null && karmaPlayer.getKarmaPoints() >= karmaPlayer.getTrack().getNextGroup(currentGroup).getKarmaPoints())) {
                         // either doesn't have a next rank or can't beat the
                         // next rank's k points, we found the right rank
-                        for (String cmd : config.getStringList("promotion.commands")) {
-                            this.runCommand(cmd.replace("<player>", playerName).replace("<group>", currentGroup.getGroupName()));
-                        }
+                        this.runCommand(config.getString("promotion.command")
+                            .replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
                         for (Player playerOnline : server.getOnlinePlayers()) {
-                            this.msg(
-                                    playerOnline,
+                            this.msg(playerOnline,
                                     config.getString("promotion.message").replace("<player>", playerName).replace("<group>", currentGroup.getGroupName()).replace("<groupcolor>", currentGroup.getChatColor().toString()));
                         }//end for
 
@@ -161,9 +159,8 @@ public class Karma {
                     && after >= group.getKarmaPoints()
                     && !playerForPromotion.hasPermission(perm)) {
                 // promotion
-                for (String cmd : config.getStringList("promotion.commands")) {
-                    this.runCommand(cmd.replace("<player>", player.getName()).replace("<group>", group.getGroupName()));
-                }
+                    this.runCommand(config.getString("promotion.command")
+                            .replace("<player>", player.getName()).replace("<group>", group.getGroupName()));
                 for (Player playerToMessage : server.getOnlinePlayers()) {
                     this.msg(
                             playerToMessage,
@@ -185,16 +182,14 @@ public class Karma {
                     && before >= player.getTrack().getNextGroup(group).getKarmaPoints()
                     && after < player.getTrack().getNextGroup(group).getKarmaPoints()) {
                 String perm = "karma." + player.getTrack().getNextGroup(group).getGroupName();
-                if (config.getBoolean("groups." + group.getGroupName()
-                        + ".first")
-                        && automatic) {
-                    return; // Prevents players from being demoted to the first
-                }							// rank
+                if (group.isFirstGroup(player.getTrack()) && player.getTrack().isFirst() 
+                        && config.getBoolean("demotion.demotetofirstgroup") && automatic) {
+                    return; // Prevents players from being demoted to the first group automatically
+                }
                 if (playerForDemotion.hasPermission(perm)) {
                     // demotion
-                    for (String cmd : config.getStringList("demotion.commands")) {
-                        this.runCommand(cmd.replace("<player>", player.getName()).replace("<group>", group.getGroupName()));
-                    }
+                    this.runCommand(config.getString("demotion.command")
+                            .replace("<player>", player.getName()).replace("<group>", group.getGroupName()));
                     for (Player playerToMessage : server.getOnlinePlayers()) {
                         this.msg(
                                 playerToMessage,
@@ -231,8 +226,7 @@ public class Karma {
         while (group != null) {
             String perm = "karma." + group.getGroupName();
             if (!player.hasPermission(perm) && group == karmaPlayer.getTrack().getFirstGroup()) {
-                log.severe(karmaPlayer.getName() + " does not have permissions for the start group! Permissions configured incorrectly (Did you forget inheritance?).");
-                return "PERMISSIONS CONFIGURED INCORRECTLY";
+                throw new NullPointerException(karmaPlayer.getName() + " does not have permissions for the start group! Permissions configured incorrectly (Did you forget inheritance?).");
             }
             if (!player.hasPermission(perm)) {
                 return lastGroup.getChatColor() + lastGroup.getGroupName() + " (" + ChatColor.YELLOW
@@ -304,8 +298,7 @@ public class Karma {
         return ticks;
     }
     protected void loadTracks() {
-        Set<String> stracks = config.getConfigurationSection("tracks").getKeys(
-                false);
+        Set<String> stracks = config.getConfigurationSection("tracks").getKeys(false);
         tracks.clear();
         for (String strack : stracks) {
             KarmaTrack track = new KarmaTrack(strack);
@@ -314,10 +307,14 @@ public class Karma {
         }
     }
     protected List<KarmaGroup> loadKarmaGroups(KarmaTrack track) {
-        Set<String> groups = config.getConfigurationSection("tracks." + 
-                track.getName()).getKeys(false);
+        Set<String> groups = config.getConfigurationSection("tracks." + track.getName()).getKeys(false);
         List<KarmaGroup> ret = new ArrayList<KarmaGroup>();
         for (String group : groups) {
+            if ("default".equals(group) &&
+                    config.getBoolean("tracks." + track.getName() + "." + group)) {
+                track.setFirst(true);
+                continue;
+            }
             ret.add(new KarmaGroup(group, 
                     config.getInt("tracks." + track.getName() + "." + group + ".points"), 
                     ChatColor.getByChar(
@@ -325,10 +322,18 @@ public class Karma {
         }
         return ret;
     }
+    public KarmaTrack getDefaultTrack() {
+        for (KarmaTrack track : tracks) {
+            if (track.isFirst()) {
+                return track;
+            }
+        }
+        throw new NullPointerException("No default track");
+    }
 
     public void runCommand(String command) {
-        if (command.contains("<NEWLINE>")) {
-            for (String c : command.split("<NEWLINE>")) {
+        if (command.contains("\n")) {
+            for (String c : command.split("\n")) {
                 server.dispatchCommand(server.getConsoleSender(), c);
                 return;
             }
@@ -340,8 +345,8 @@ public class Karma {
         if (message == null || "".equals(message)) {
             return;
         }
-        if (message.contains("<NEWLINE>")) {
-            for (String s : message.split("<NEWLINE>")) {
+        if (message.contains("\n")) {
+            for (String s : message.split("\n")) {
                 destination.sendMessage(parseColor(config.getString("prefix")
                         + s));
             }

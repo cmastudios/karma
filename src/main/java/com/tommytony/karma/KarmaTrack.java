@@ -8,9 +8,11 @@ public class KarmaTrack {
     // Ordered least to greatest karma point value
     private String name;
     private List<KarmaGroup> groups;
+    private boolean first;
     public KarmaTrack(String name) {
-        groups = new ArrayList<KarmaGroup>();
+        this.groups = new ArrayList<KarmaGroup>();
         this.name = name;
+        this.first = false;
     }
     /**
      * Set all groups in the track
@@ -71,6 +73,20 @@ public class KarmaTrack {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return the first
+     */
+    public boolean isFirst() {
+        return first;
+    }
+
+    /**
+     * @param first the first to set
+     */
+    public void setFirst(boolean first) {
+        this.first = first;
     }
 
 }

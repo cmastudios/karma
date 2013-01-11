@@ -26,9 +26,12 @@ public class KarmaGroup implements Comparable {
         return chatColor;
     }
 
+    public boolean isFirstGroup(KarmaTrack track) {
+        return track.getFirstGroup() == this ? true : false;
+    }
     public int compareTo(Object o) {
         if (!(o instanceof KarmaGroup)) {
-            throw new ClassCastException(this.getClass().getCanonicalName() + 
+            throw new ClassCastException(this.getClass().getCanonicalName() +
                     " is not comparable to a " + o.getClass().getCanonicalName()
                     );
         }
