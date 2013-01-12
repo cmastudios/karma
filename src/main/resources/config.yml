@@ -122,6 +122,9 @@ war:
     messages:
         creator: Thanks for making warzones!
         player: Thanks for playing War!
+import:
+    bonus: true
+    percent: 0.2
 sqlite:
     database: karma.db
 mysql:

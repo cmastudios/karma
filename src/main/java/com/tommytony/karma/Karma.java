@@ -147,8 +147,14 @@ public class Karma {
             }
             group = track.getNextGroup(group);
         }
-        initialKarma += (int) (0.2 * karmaToNext); // start bonus of 20% to next
-        // rank
+        // Extra karma added on initial import
+        if (initialKarma > 0 && config.getBoolean("import.bonus")) {
+            double percent = config.getDouble("import.percent");
+            if (percent < 0 || percent > 1) {
+                throw new NullPointerException("import.percent must be a percentage (ie 0.25 for 25%)");
+            }
+            initialKarma += (int) (percent * karmaToNext);
+        }
         return initialKarma;
     }
     protected KarmaTrack getInitialTrack(Player player) {
