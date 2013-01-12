@@ -381,6 +381,8 @@ public class Karma {
         if (message == null || "".equals(message)) {
             return;
         }
+        
+        message = message.replaceAll("<NEWLINE>", "\n");
         if (message.contains("\n")) {
             for (String s : message.split("\n")) {
                 destination.sendMessage(parseColor(config.getString("prefix")
