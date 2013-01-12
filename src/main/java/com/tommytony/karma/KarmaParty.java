@@ -3,14 +3,11 @@ package com.tommytony.karma;
 import com.tommytony.war.Team;
 import com.tommytony.war.War;
 import com.tommytony.war.Warzone;
-import java.util.Random;
-import java.util.logging.Level;
 import org.bukkit.entity.Player;
 
 public class KarmaParty implements Runnable {
 
     private final Karma karma;
-    private final Random random = new Random();
 
     public KarmaParty(Karma karma) {
         this.karma = karma;
@@ -20,26 +17,28 @@ public class KarmaParty implements Runnable {
         for (Player player : this.karma.server.getOnlinePlayers()) {
             this.karma.msg(player, karma.config.getString("party.messages.announce"));
         }
-        String playerList = "";
+        StringBuilder playerList = new StringBuilder();
+        int totalDistributedKarma = 0;
         for (String playerName : this.karma.getPlayers().keySet()) {
-            KarmaPlayer player = this.karma.getPlayers().get(playerName);
-            long activeInterval = System.currentTimeMillis() - player.getLastActivityTime();
+            KarmaPlayer karmaPlayer = this.karma.getPlayers().get(playerName);
+            long activeInterval = System.currentTimeMillis() - karmaPlayer.getLastActivityTime();
             int minutesAfk = (int) Math.floor(activeInterval / (1000 * 60));
-            Player p = this.karma.findPlayer(player.getName());
+            Player player = this.karma.findPlayer(karmaPlayer.getName());
             if (minutesAfk < 10) {
-                int warPlayBonus = getWarPlayingBonus(player, p);
-                int warZonemakerBonus = getZonemakerBonus(player, p);
+                int warPlayBonus = getWarPlayingBonus(karmaPlayer);
+                int warZonemakerBonus = getZonemakerBonus(karmaPlayer);
                 int total = karma.config.getInt("party.points") + warPlayBonus + warZonemakerBonus;
-                this.karma.msg(p, karma.config.getString("party.messages.pointgain").replace("<points>", karma.config.getString("party.points")));
+                this.karma.msg(player, karma.config.getString("party.messages.pointgain").replace("<points>", Integer.toString(total)));
 
-                player.addKarma(total);
-                playerList += playerName + ", ";
+                karmaPlayer.addKarma(total);
+                playerList.append(playerName).append(", ");
+                totalDistributedKarma += total;
             } else {
-                this.karma.msg(p, karma.config.getString("party.messages.afknogain").replace("<points>", karma.config.getString("party.points")));
+                this.karma.msg(player, karma.config.getString("party.messages.afknogain").replace("<points>", karma.config.getString("party.points")));
             }
         }
-        if (!playerList.equals("")) {
-            this.karma.server.getLogger().log(Level.INFO, "Karma> " + playerList + "gained " + karma.config.getString("party.points") + " karma");
+        if (playerList.toString().length() > 0) {
+            this.karma.log.info(playerList.toString() + " gained " + totalDistributedKarma + " karma");
         }
 
         // save
@@ -51,20 +50,25 @@ public class KarmaParty implements Runnable {
                 this.karma.getNextRandomKarmaPartyDelay());
     }
 
-    private int getWarPlayingBonus(KarmaPlayer karmaPlayer, Player player) {
+    private int getWarPlayingBonus(KarmaPlayer karmaPlayer) {
         if (!karma.warEnabled) {
             return 0;
         }
         if (Warzone.getZoneByPlayerName(karmaPlayer.getName()) != null) {
-            if (random.nextInt(3) == 2) {
-                karma.msg(player, karma.config.getString("war.messages.player"));
-                return 1;
+            double chance = karma.config.getDouble("war.chance");
+            int points = karma.config.getInt("war.points");
+            if (chance < 0 || chance > 1) {
+                throw new NullPointerException("war.chance must be a percentage (ie 0.25 for 25%)");
+            }
+            if (Math.random() < chance) {
+                karma.msg(karmaPlayer.getPlayer().getPlayer(), karma.config.getString("war.messages.player"));
+                return points;
             }
         }
         return 0;
     }
 
-    private int getZonemakerBonus(KarmaPlayer karmaPlayer, Player player) {
+    private int getZonemakerBonus(KarmaPlayer karmaPlayer) {
         if (!karma.warEnabled) {
             return 0;
         }
@@ -72,9 +76,14 @@ public class KarmaParty implements Runnable {
             for (String author : zone.getAuthors()) {
                 if (author.equals(karmaPlayer.getName()) && !zoneIsEmpty(zone)
                         && zone.isEnoughPlayers()) {
-                    if (random.nextInt(3) == 2) {
-                        karma.msg(player, karma.config.getString("war.messages.creator"));
-                        return 1;
+                    double chance = karma.config.getDouble("war.chance");
+                    int points = karma.config.getInt("war.points");
+                    if (chance < 0 || chance > 1) {
+                        throw new NullPointerException("war.chance must be a percentage (ie 0.25 for 25%)");
+                    }
+                    if (Math.random() < chance) {
+                        karma.msg(karmaPlayer.getPlayer().getPlayer(), karma.config.getString("war.messages.creator"));
+                        return points;
                     }
                 }
             }
