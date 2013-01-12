@@ -13,7 +13,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class KarmaTrackCommand implements CommandExecutor {
+public class TrackKarmaCommand implements CommandExecutor {
     
     private Karma karma;
     
@@ -32,7 +32,7 @@ public class KarmaTrackCommand implements CommandExecutor {
         if(!(matches.isEmpty()) && (karma.getTrack(args[2]) != null) && sender.hasPermission("karma.track")) {
             KarmaTrack trackToChangeTo = karma.getTrack(args[2]);
             KarmaPlayer playerToChangeGroup = karma.players.get(matches.get(0).getName());
-            karma.msg(sender, "Track of " + matches3.get(0) + " changed from " + playerToChangeGroup.getTrack().getName() + " to " + args[2]);
+            karma.msg(sender, "Track of " + matches.get(0) + " changed from " + playerToChangeGroup.getTrack().getName() + " to " + args[2]);
             playerToChangeGroup.setTrack(trackToChangeTo);
         }
         
