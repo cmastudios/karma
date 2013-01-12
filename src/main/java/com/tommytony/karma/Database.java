@@ -25,7 +25,7 @@ public class Database {
                 this.addColumn(connection, "lastgift numeric");
                 // Shakes fist at sqlite no drop column
                 this.addColumn(connection, "lastprize numeric");
-                this.addColumn(connection, "track text");
+                this.addColumn(connection, "track numeric");
 
                 statement.close();
                 connection.close();
@@ -66,7 +66,7 @@ public class Database {
                             result.getInt("karma"), 
                             result.getLong("lastactive"), 
                             result.getLong("lastgift"), 
-                            karma.getTrack(result.getString("track")));
+                            karma.getTrack(result.getLong("track")));
                 }
                 result.close();
                 stat.close();
@@ -99,7 +99,7 @@ public class Database {
                     pstmt.setLong(2, karmaPlayer.getLastActivityTime());
                     pstmt.setLong(3, karmaPlayer.getLastGiftTime());
                     //TODO: Don't Ever store anything in a database as a String unless you are absolutly forced to cma, assign numbers to the tracks... -grin
-                    pstmt.setString(4, karmaPlayer.getTrack().getName());
+                    pstmt.setLong(4, karmaPlayer.getTrack().getName().hashCode());
                     pstmt.setString(5, karmaPlayer.getName());
                     pstmt.executeUpdate();
                     // See, much better!
@@ -111,7 +111,7 @@ public class Database {
                     pstmt.setInt(2, karmaPlayer.getKarmaPoints());
                     pstmt.setLong(3, karmaPlayer.getLastActivityTime());
                     pstmt.setLong(4, karmaPlayer.getLastGiftTime());
-                    pstmt.setString(5, karmaPlayer.getTrack().getName());
+                    pstmt.setLong(5, karmaPlayer.getTrack().getName().hashCode());
                     pstmt.executeUpdate();
 
 //                    stat.executeUpdate(

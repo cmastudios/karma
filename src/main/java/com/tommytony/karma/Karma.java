@@ -362,6 +362,15 @@ public class Karma {
         }
         return null;
     }
+    
+    public KarmaTrack(long hash) {
+        for(KarmaTrack track : tracks) {
+            if(track.getName().hashCode() == hash) {
+                return track;
+            }
+        }
+        return null;
+    }
 
     private String parseColor(String message) {
         return message.replaceAll("&([0-9a-zA-Z])", ChatColor.COLOR_CHAR + "$1");
