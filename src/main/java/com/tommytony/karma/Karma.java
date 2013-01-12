@@ -363,7 +363,7 @@ public class Karma {
         return null;
     }
     
-    public KarmaTrack(long hash) {
+    public KarmaTrack getTrack(long hash) {
         for(KarmaTrack track : tracks) {
             if(track.getName().hashCode() == hash) {
                 return track;
