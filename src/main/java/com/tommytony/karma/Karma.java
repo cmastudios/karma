@@ -115,7 +115,7 @@ public class Karma {
             // create player
             int initialKarma = this.getInitialKarma(player);
             KarmaPlayer karmaPlayer = new KarmaPlayer(this, player.getName(),
-                    initialKarma, System.currentTimeMillis(), 0, getTrack("default"));
+                    initialKarma, System.currentTimeMillis(), 0, getInitialTrack(player));
             players.put(player.getName(), karmaPlayer);
             db.put(karmaPlayer);
 
@@ -125,29 +125,59 @@ public class Karma {
         }
     }
 
-    private int getInitialKarma(Player player) {
-        KarmaGroup group = getTrack("default").getFirstGroup();
+    protected int getInitialKarma(Player player) {
         int initialKarma = 0;
         int karmaToNext = 0;
+        KarmaTrack track = getInitialTrack(player);
+        KarmaGroup group = track.getFirstGroup();
         while (group != null) {
             String perm = "karma." + group.getGroupName();
             if (player.hasPermission(perm)) {
                 initialKarma = group.getKarmaPoints();
-                if (getTrack("default").getNextGroup(group) != null) {
-                    karmaToNext = getTrack("default").getNextGroup(group).getKarmaPoints()
+                if (track.getNextGroup(group) != null) {
+                    karmaToNext = track.getNextGroup(group).getKarmaPoints()
                             - group.getKarmaPoints();
                 } else {
-                    // greybeards only initialize with 2020
+                    // Highest rank in track only initialize with 2020
                     karmaToNext = 100;
                 }
             } else {
+                // If they don't have permission for the next group in the track, we're done here
                 break;
             }
-            group = getTrack("default").getNextGroup(group);
+            group = track.getNextGroup(group);
         }
         initialKarma += (int) (0.2 * karmaToNext); // start bonus of 20% to next
         // rank
         return initialKarma;
+    }
+    protected KarmaTrack getInitialTrack(Player player) {
+        KarmaTrack ret;
+        Map<KarmaGroup, KarmaTrack> highestGroup = new HashMap<KarmaGroup, KarmaTrack>();
+        List<KarmaGroup> groupList = new ArrayList<KarmaGroup>();
+        for (KarmaTrack track : tracks) {
+            KarmaGroup group = track.getFirstGroup();
+            KarmaGroup lastGroup = null;
+            while (group != null) {
+                String perm = "karma." + group.getGroupName();
+                if (!player.hasPermission(perm) && lastGroup != null) {
+                    // If they don't have permission for the next group in the track, we're done here
+                    highestGroup.put(lastGroup, track);
+                    groupList.add(lastGroup);
+                    break;
+                }
+                // When there is no group past the current, add the current
+                if (player.hasPermission(perm) && track.getNextGroup(group) == null) {
+                    highestGroup.put(group, track);
+                    groupList.add(group);
+                } else if (player.hasPermission(perm)) {
+                    lastGroup = group;
+                }
+                group = track.getNextGroup(group);
+            }
+        }
+        Collections.sort(groupList);
+        return highestGroup.get(groupList.get((groupList.size()-1)));
     }
 
     public void checkForPromotion(KarmaPlayer player, int before, int after) {

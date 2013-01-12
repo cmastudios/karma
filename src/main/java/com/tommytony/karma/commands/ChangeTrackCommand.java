@@ -1,6 +1,7 @@
 package com.tommytony.karma.commands;
 
 import com.tommytony.karma.Karma;
+import com.tommytony.karma.KarmaGroup;
 import com.tommytony.karma.KarmaPlayer;
 import com.tommytony.karma.KarmaTrack;
 import org.bukkit.command.Command;
@@ -51,7 +52,13 @@ public class ChangeTrackCommand implements CommandExecutor {
         }
         // Will automatically add karma to bump the player's karma up to the first group in the track
         chKarmaTrackTarget.setTrack(targetTrack);
-        chKarmaTrackTarget.setGroup(chKarmaTrackTarget.getGroup());
+        KarmaGroup currentGroup = targetTrack.getFirstGroup();
+        while (currentGroup != null) {
+            if (chKarmaTrackTarget.getKarmaPoints() >= currentGroup.getKarmaPoints()) {
+                chKarmaTrackTarget.setGroup(currentGroup);
+            }
+            currentGroup = targetTrack.getNextGroup(currentGroup);
+        }
         String msg = karma.config.getString("changetrack.message")
                 .replace("<player>", chTrackTarget.getName())
                 .replace("<track>", targetTrack.getName())
