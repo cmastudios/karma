@@ -88,5 +88,6 @@ public class KarmaPlayer {
      */
     public void setTrack(KarmaTrack track) {
         this.track = track;
+        this.karma.checkForDemotion(this, this.karmaPoints, this.karmaPoints);
     }
 }
