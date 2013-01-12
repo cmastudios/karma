@@ -17,7 +17,7 @@ public class TrackKarmaCommand implements CommandExecutor {
     
     private Karma karma;
     
-    public KarmaTrackCommand(Karma instance) {
+    public TrackKarmaCommand(Karma instance) {
         this.karma = instance;
     }
     
