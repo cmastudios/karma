@@ -98,6 +98,7 @@ public class Database {
                     pstmt.setInt(1, karmaPlayer.getKarmaPoints());
                     pstmt.setLong(2, karmaPlayer.getLastActivityTime());
                     pstmt.setLong(3, karmaPlayer.getLastGiftTime());
+                    //TODO: Don't Ever store anything in a database as a String unless you are absolutly forced to cma, assign numbers to the tracks... -grin
                     pstmt.setString(4, karmaPlayer.getTrack().getName());
                     pstmt.setString(5, karmaPlayer.getName());
                     pstmt.executeUpdate();
