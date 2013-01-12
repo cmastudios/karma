@@ -115,6 +115,9 @@ public class KarmaPlugin extends JavaPlugin {
                 if (args[0].equalsIgnoreCase("add")) {
                     return new AddKarmaCommand(karma).onCommand(sender, cmd, alias, args);
                 }
+                if (args[0].equalsIgnoreCase("track")) {
+                    return new ChangeTrackCommand(karma).onCommand(sender, cmd, alias, args);
+                }
                 if (args.length == 1) {
                     return new CheckKarmaCommand(karma).onCommand(sender, cmd, alias, args);
                 }

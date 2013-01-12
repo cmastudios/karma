@@ -127,6 +127,9 @@ public class KarmaPlayer {
         }
         return null;
     }
+    public void setGroup(KarmaGroup group) {
+        karma.runCommand(karma.config.getString("promotion.command").replace("<player>", getName()).replace("<group>", group.getGroupName()));
+    }
     public OfflinePlayer getPlayer() {
         return karma.server.getOfflinePlayer(getName());
     }
