@@ -2,8 +2,8 @@ name: ${project.name}
 version: ${project.version}
 description: Karmic auto-ranking
 author: tommytony
-authors: [cmastudios]
-website: https://github.com/taoneill/karma
+authors: [cmastudios, grinning]
+website: http://tommytony.us/
 
 main: com.tommytony.karma.KarmaPlugin
 
