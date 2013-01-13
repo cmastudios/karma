@@ -17,6 +17,10 @@ public class RanksCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (args.length != 1) {
+            karma.msg(sender, karma.config.getString("errors.badargs"));
+            return false;
+        }
         for (KarmaTrack track : karma.tracks) {
             KarmaGroup group = track.getFirstGroup();
             StringBuilder ranksString = new StringBuilder();

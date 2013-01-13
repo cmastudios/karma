@@ -18,9 +18,9 @@ public class ChangeTrackCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (args.length < 3) {
+        if (args.length != 3) {
             karma.msg(sender, karma.config.getString("errors.badargs"));
-            return true;
+            return false;
         }
         Player chTrackTarget = karma.server.getPlayer(args[1]);
         KarmaPlayer chKarmaTrackTarget = karma.players.get(chTrackTarget.getName());

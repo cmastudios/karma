@@ -17,9 +17,9 @@ public class PromoteCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if(args.length != 3) {
-        	karma.msg(sender, karma.config.getString("errors.badargs"));
-        	return true;
+        if(args.length != 2) {
+            karma.msg(sender, karma.config.getString("errors.badargs"));
+            return false;
         }
         
         Player promoteTarget = karma.server.getPlayer(args[1]);
