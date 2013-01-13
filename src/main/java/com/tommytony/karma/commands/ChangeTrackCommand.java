@@ -23,15 +23,15 @@ public class ChangeTrackCommand implements CommandExecutor {
             return false;
         }
         Player chTrackTarget = karma.server.getPlayer(args[1]);
+        if (chTrackTarget == null) {
+            karma.msg(sender, karma.config.getString("errors.noplayer"));
+            return true;
+        }
         KarmaPlayer chKarmaTrackTarget = karma.players.get(chTrackTarget.getName());
         if (chKarmaTrackTarget == null) {
             return true;
         }
 
-        if (chTrackTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
         KarmaTrack targetTrack = null;
         for (KarmaTrack track : karma.tracks) {
             if (track.getName().equals(args[2])) {

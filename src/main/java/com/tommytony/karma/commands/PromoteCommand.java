@@ -23,16 +23,16 @@ public class PromoteCommand implements CommandExecutor {
         }
         
         Player promoteTarget = karma.server.getPlayer(args[1]);
+        if (promoteTarget == null) {
+            karma.msg(sender, karma.config.getString("errors.noplayer"));
+            return true;
+        }
         KarmaPlayer karmaPromoteTarget = karma.players.get(promoteTarget.getName());
         if (karmaPromoteTarget == null) {
             return true;
         }
 
         KarmaGroup currentGroup = karmaPromoteTarget.getTrack().getFirstGroup();
-        if (promoteTarget == null) {
-            karma.msg(sender, karma.config.getString("promote.messages.noplayer"));
-            return true;
-        }
         while (currentGroup != null) {
             if (karmaPromoteTarget.getKarmaPoints() < currentGroup.getKarmaPoints()) {
                 if (sender.hasPermission("karma.promote." + currentGroup.getGroupName())
