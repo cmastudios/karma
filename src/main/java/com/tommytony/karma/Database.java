@@ -2,6 +2,7 @@ package com.tommytony.karma;
 
 import java.io.File;
 import java.sql.*;
+import org.bukkit.entity.Player;
 
 public class Database {
 
@@ -51,7 +52,13 @@ public class Database {
                 if (result.next()) {
                     KarmaTrack track = karma.getTrack(result.getLong("track"));
                     if (track == null) {
-                        track = karma.getDefaultTrack();
+                        Player player = karma.server.getPlayerExact(playerName);
+                        if (player != null) {
+                            // If player is online get their track normally
+                            track = karma.getInitialTrack(player);
+                        } else {
+                            track = karma.getDefaultTrack();
+                        }
                     }
                     karmaPlayer = new KarmaPlayer(this.karma, playerName, 
                             result.getInt("karma"), 

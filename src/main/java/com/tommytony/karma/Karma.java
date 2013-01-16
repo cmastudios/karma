@@ -168,6 +168,11 @@ public class Karma {
             // Iterate the groups in the track
             for (KarmaGroup group : track) {
                 String perm = group.getPermission();
+                if (group.isFirstGroup(track) && !player.hasPermission(perm)) {
+                    // If they do not have permission for the first group in
+                    // this track, skip to next track to save time
+                    break;
+                }
                 if (!player.hasPermission(perm) && lastGroup != null) {
                     // Store the last group as it is the last group in the track
                     // that they have permission for
@@ -185,6 +190,10 @@ public class Karma {
         }
         // Sort the groups by point value
         Collections.sort(groupList);
+        if (groupList.isEmpty()) {
+            // If player is new, give them default track
+            return getDefaultTrack();
+        }
         // Get the group with the greatest amount of Karma points that this user
         // belongs to in any track and return the track it is in
         return groupList.get((groupList.size()-1)).getTrack(tracks);
