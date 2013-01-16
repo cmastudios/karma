@@ -2,9 +2,10 @@ package com.tommytony.karma;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-public class KarmaTrack {
+public class KarmaTrack implements Iterable<KarmaGroup> {
     // Ordered least to greatest karma point value
     private String name;
     private List<KarmaGroup> groups;
@@ -87,6 +88,10 @@ public class KarmaTrack {
      */
     public void setFirst(boolean first) {
         this.first = first;
+    }
+
+    public Iterator<KarmaGroup> iterator() {
+        return groups.iterator();
     }
 
 }

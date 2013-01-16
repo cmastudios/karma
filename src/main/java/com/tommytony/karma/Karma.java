@@ -159,31 +159,35 @@ public class Karma {
     }
     protected KarmaTrack getInitialTrack(Player player) {
         KarmaTrack ret;
-        Map<KarmaGroup, KarmaTrack> highestGroup = new HashMap<KarmaGroup, KarmaTrack>();
+        // List of all the groups that this player belongs to
+        // It only lists a group if it is the last group in a track they have
+        // permission for
         List<KarmaGroup> groupList = new ArrayList<KarmaGroup>();
         for (KarmaTrack track : tracks) {
-            KarmaGroup group = track.getFirstGroup();
             KarmaGroup lastGroup = null;
-            while (group != null) {
-                String perm = "karma." + group.getGroupName();
+            // Iterate the groups in the track
+            for (KarmaGroup group : track) {
+                String perm = group.getPermission();
                 if (!player.hasPermission(perm) && lastGroup != null) {
-                    // If they don't have permission for the next group in the track, we're done here
-                    highestGroup.put(lastGroup, track);
+                    // Store the last group as it is the last group in the track
+                    // that they have permission for
                     groupList.add(lastGroup);
-                    break;
-                }
-                // When there is no group past the current, add the current
-                if (player.hasPermission(perm) && track.getNextGroup(group) == null) {
-                    highestGroup.put(group, track);
+                } else if (player.hasPermission(perm) && track.getNextGroup(group) == null) {
+                    // When you have reached the last group in the track and the
+                    // player has permissions for it, add it
                     groupList.add(group);
                 } else if (player.hasPermission(perm)) {
+                    // If it is not the last group and the player has permission
+                    // for it, set the last group as it for the first check
                     lastGroup = group;
                 }
-                group = track.getNextGroup(group);
             }
         }
+        // Sort the groups by point value
         Collections.sort(groupList);
-        return highestGroup.get(groupList.get((groupList.size()-1)));
+        // Get the group with the greatest amount of Karma points that this user
+        // belongs to in any track and return the track it is in
+        return groupList.get((groupList.size()-1)).getTrack(tracks);
     }
 
     public void checkForPromotion(KarmaPlayer player, int before, int after) {
