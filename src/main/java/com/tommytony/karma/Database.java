@@ -21,11 +21,14 @@ public class Database {
                 Connection connection = this.getConnection();
                 Statement statement = connection.createStatement();
                 // (name, karma, lastactive, lastgift, lastprize, track)
-                statement.executeUpdate("create table if not exists players (name text, karma numeric, lastactive numeric)");
+                // If the table has already been created its in sqlite so numeric is working fine for longs
+                // If it hasn't been created theres a chance that they're using MySQL so create it with lastactive as a bigint
+                // bigint works in SQLite too, but no difference between numeric. In MySQL, there's a large difference
+                statement.executeUpdate("create table if not exists players (name text, karma numeric, lastactive bigint)");
 
-                this.addColumn(connection, "lastgift numeric");
+                this.addColumn(connection, "lastgift bigint");
                 // Shakes fist at sqlite no drop column
-                this.addColumn(connection, "lastprize numeric");
+                this.addColumn(connection, "lastprize bigint");
                 this.addColumn(connection, "track numeric");
 
                 statement.close();
