@@ -17,13 +17,12 @@ public class GiftCommand implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
         if (!sender.hasPermission("karma.gift")) {
-            karma.msg(sender,
-                    karma.config.getString("errors.nopermission"));
+            karma.msg(sender, karma.config.getString("errors.nopermission"));
             return true;
         }
-        if (args.length < 2) {
+        if (args.length != 2) {
             karma.msg(sender, karma.config.getString("errors.badargs"));
-            return true;
+            return false;
         }
         Player giftTarget = karma.server.getPlayer(args[1]);
         if (giftTarget == null) {

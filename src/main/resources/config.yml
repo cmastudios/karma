@@ -115,6 +115,7 @@ errors:
     isalreadyintrack: '&cThe player is already in that track'
     unknowncommand: '&cUnknown command. Use &a/karma help&d.'
     commandexception: '&cException <exception> occured while processing your command.'
+    badargs: '&cBad Arguments!.'
 war:
     bonus: true
     chance: 0.25
