@@ -53,12 +53,20 @@ public class KarmaTrack {
         }
         return null;
     }
-    
+    /**
+     * Get a group in the track based on a player's karma
+     * @param karma the amount of karma that falls in the group
+     * @return the group in bounds or null if one can't be found
+     */
     public KarmaGroup getGroupOnBounds(int karma) {
-    	for(KarmaGroup group : groups) {
-    		if((group.getKarmaPoints() <= karma) && (karma < this.getNextGroup(group).getKarmaPoints())) {
-    			return group;
-    		}
+    	for (KarmaGroup group : groups) {
+            KarmaGroup nextGroup = this.getNextGroup(group);
+            if ((group.getKarmaPoints() <= karma) && nextGroup == null) {
+                return group;
+            } else if ((group.getKarmaPoints() <= karma) 
+                    && (karma < nextGroup.getKarmaPoints())) {
+                return group;
+            }
     	}
     	return null;
     }
