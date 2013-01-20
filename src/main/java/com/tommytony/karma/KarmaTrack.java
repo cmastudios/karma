@@ -53,6 +53,16 @@ public class KarmaTrack {
         }
         return null;
     }
+    
+    public KarmaGroup getGroupOnBounds(int karma) {
+    	for(KarmaGroup group : groups) {
+    		if((group.getKarmaPoints() <= karma) && (karma < this.getNextGroup(group).getKarmaPoints())) {
+    			return group;
+    		}
+    	}
+    	return null;
+    }
+    
     /**
      * Get the group with more karma than the specified group
      * @param previousGroup the group with less karma then the next

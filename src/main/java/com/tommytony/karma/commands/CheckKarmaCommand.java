@@ -18,9 +18,21 @@ public class CheckKarmaCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
         Player checkOtherTarget = karma.server.getPlayer(args[0]);
         if (checkOtherTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
+        	//KARMA-7 fix
+        	KarmaPlayer play = karma.db.get(args[0]);
+        	if(play == null) {
+        		karma.msg(sender, 
+        				karma.config.getString("errors.noplayer"));
+        	} else {
+        	karma.msg(sender, 
+        			karma.config.getString("check.others.message")
+        			.replace("<player>", args[0])
+        			.replace("<points>", Integer.toString(play.getKarmaPoints()))
+        			.replace("<curgroupcolor>", play.getTrack().getGroupOnBounds(play.getKarmaPoints()).getChatColor().toString()));
+        	}
             return true;
         }
+        
         KarmaPlayer karmaCheckOtherTarget = karma.players.get(checkOtherTarget.getName());
         if (karmaCheckOtherTarget != null) {
             karma.msg(
