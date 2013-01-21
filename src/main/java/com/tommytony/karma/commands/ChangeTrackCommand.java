@@ -52,12 +52,15 @@ public class ChangeTrackCommand implements CommandExecutor {
         }
         // Will automatically add karma to bump the player's karma up to the first group in the track
         chKarmaTrackTarget.setTrack(targetTrack);
-        KarmaGroup currentGroup = targetTrack.getFirstGroup();
-        while (currentGroup != null) {
+        for (KarmaGroup currentGroup : targetTrack) {
             if (chKarmaTrackTarget.getKarmaPoints() >= currentGroup.getKarmaPoints()) {
                 chKarmaTrackTarget.setGroup(currentGroup);
             }
-            currentGroup = targetTrack.getNextGroup(currentGroup);
+        }
+        if (chKarmaTrackTarget.getGroupByPermissions() != chKarmaTrackTarget.getGroup()) {
+            throw new NullPointerException("Attempted to promote player " + chKarmaTrackTarget.getName() + " to group " + chKarmaTrackTarget.getGroup().getGroupName()
+                    + "during a track change, but after promotion, the player doesn't have " + chKarmaTrackTarget.getGroup().getPermission() + "! Promote command "
+                    + "configured incorrectly.");
         }
         String msg = karma.config.getString("changetrack.message")
                 .replace("<player>", chTrackTarget.getName())

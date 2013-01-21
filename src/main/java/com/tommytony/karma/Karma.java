@@ -200,60 +200,76 @@ public class Karma {
     }
 
     public void checkForPromotion(KarmaPlayer player, int before, int after) {
-        KarmaGroup group = player.getTrack().getFirstGroup();
-        Player playerForPromotion = this.findPlayer(player.getName());
-        while (group != null && playerForPromotion != null) {
-            String perm = "karma." + group.getGroupName();
+        Player playerForPromotion = player.getPlayer().getPlayer();
+        for (KarmaGroup group : player.getTrack()) {
+            String perm = group.getPermission();
+            // If their original karma was less than this group's karma points
+            // and it is now greater than this group's karma points
+            // and they are not currently in this group, promote them
             if (before < group.getKarmaPoints()
                     && after >= group.getKarmaPoints()
                     && !playerForPromotion.hasPermission(perm)) {
-                // promotion
-                    this.runCommand(config.getString("promotion.command")
-                            .replace("<player>", player.getName()).replace("<group>", group.getGroupName()));
+                
+                this.runCommand(config.getString("promotion.command")
+                        .replace("<player>", player.getName())
+                        .replace("<group>", group.getGroupName()));
+                if (!playerForPromotion.hasPermission(perm)) {
+                    throw new NullPointerException("Attempted to promote player " + player.getName() + " to group " + group.getGroupName()
+                            + ", but after promotion, the player doesn't have " + group.getPermission() + "! Promote command configured incorrectly.");
+                }
                 for (Player playerToMessage : server.getOnlinePlayers()) {
-                    this.msg(
-                            playerToMessage,
-                            config.getString("promotion.message").replace("<player>", playerToMessage.getName()).replace("<group>", group.getGroupName()).replace("<groupcolor>",
-                            group.getChatColor().toString()));
+                    this.msg(playerToMessage, config.getString("promotion.message")
+                            .replace("<player>", playerToMessage.getName())
+                            .replace("<group>", group.getGroupName())
+                            .replace("<groupcolor>", group.getChatColor().toString()));
                 }
                 log.info(player.getName() + " promoted to " + group.getGroupName());
             }
-            group = player.getTrack().getNextGroup(group);
         }
     }
 
-    public void checkForDemotion(KarmaPlayer player, int before, int after,
-            boolean automatic) {
-        KarmaGroup group = player.getTrack().getFirstGroup();
-        Player playerForDemotion = this.findPlayer(player.getName());
-        while (group != null && playerForDemotion != null) {
-            if (player.getTrack().getNextGroup(group) != null
-                    && before >= player.getTrack().getNextGroup(group).getKarmaPoints()
-                    && after < player.getTrack().getNextGroup(group).getKarmaPoints()) {
-                String perm = "karma." + player.getTrack().getNextGroup(group).getGroupName();
-                if (group.isFirstGroup(player.getTrack()) && player.getTrack().isFirst() 
-                        && config.getBoolean("demotion.demotetofirstgroup") && automatic) {
+    public void checkForDemotion(KarmaPlayer player, int before, int after, boolean automatic) {
+        Player playerForDemotion = player.getPlayer().getPlayer();
+        ListIterator<KarmaGroup> li = player.getTrack().reverseListIterator();
+        while (li.hasPrevious()) {
+            KarmaGroup group = li.previous();
+            KarmaGroup previousGroup = player.getTrack().getPreviousGroup(group);
+            // If there is a previous group the player can be placed into
+            // Their original karma is in the range of the current group
+            // and now it is less then the current group
+            // and now it is in the range of the previous group
+            if (previousGroup != null
+                    && before >= group.getKarmaPoints()
+                    && after < group.getKarmaPoints()
+                    && after >= previousGroup.getKarmaPoints()) {
+
+                if (previousGroup.isFirstGroup(player.getTrack()) && player.getTrack().isFirst() 
+                        && !config.getBoolean("demotion.demotetofirstgroup") && automatic) {
                     return; // Prevents players from being demoted to the first group automatically
                 }
-                if (playerForDemotion.hasPermission(perm)) {
-                    // demotion
+                if (playerForDemotion.hasPermission(group.getPermission())) {
+                    // Demote the player, because they are in the next group but shouldn't be
                     this.runCommand(config.getString("demotion.command")
-                            .replace("<player>", player.getName()).replace("<group>", group.getGroupName()));
-                    for (Player playerToMessage : server.getOnlinePlayers()) {
-                        this.msg(
-                                playerToMessage,
-                                config.getString("demotion.message").replace("<player>", player.getName()).replace("<group>",
-                                group.getGroupName()).replace("<groupcolor>",
-                                group.getChatColor().toString()));
+                            .replace("<player>", player.getName())
+                            .replace("<group>", previousGroup.getGroupName()));
+                    if (player.getGroupByPermissions() != previousGroup) {
+                        throw new NullPointerException("Attempted to demote player " + player.getName() + " to group " + group.getGroupName()
+                                + ", but after demotion, the player isn't in this group! Demote command configured incorrectly.");
                     }
-                    log.info(player.getName() + " demoted to " + group.getGroupName());
+                    for (Player playerToMessage : server.getOnlinePlayers()) {
+                        this.msg(playerToMessage, config.getString("demotion.message")
+                                .replace("<player>", player.getName())
+                                .replace("<group>", previousGroup.getGroupName())
+                                .replace("<groupcolor>", previousGroup.getChatColor().toString()));
+                    }
+                    log.info(player.getName() + " demoted to " + previousGroup.getGroupName());
                     break;
                 }
             }
-            group = player.getTrack().getNextGroup(group);
         }
     }
 
+    @Deprecated
     public String getPlayerNextGroupString(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = karmaPlayer.getTrack().getFirstGroup();
@@ -268,6 +284,7 @@ public class Karma {
         return "none";
     }
 
+    @Deprecated
     public String getPlayerGroupString(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = karmaPlayer.getTrack().getFirstGroup();
@@ -291,6 +308,7 @@ public class Karma {
         return "none";
     }
 
+    @Deprecated
     public ChatColor getPlayerNextGroupColor(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = karmaPlayer.getTrack().getFirstGroup();
@@ -305,6 +323,7 @@ public class Karma {
         return ChatColor.WHITE;
     }
 
+    @Deprecated
     public ChatColor getPlayerGroupColor(KarmaPlayer karmaPlayer) {
         Player player = this.findPlayer(karmaPlayer.getName());
         KarmaGroup group = karmaPlayer.getTrack().getFirstGroup();
@@ -327,6 +346,7 @@ public class Karma {
         return ChatColor.WHITE;
     }
 
+    @Deprecated
     public Player findPlayer(String playerName) {
         for (Player player : server.getOnlinePlayers()) {
             if (player.getName().equals(playerName)) {
@@ -418,7 +438,11 @@ public class Karma {
         }
         return null;
     }
-    
+    /**
+     * Get a track by hash code
+     * @param hash the tracks hash code
+     * @return the track or null if not found
+     */
     public KarmaTrack getTrack(long hash) {
         for(KarmaTrack track : tracks) {
             if(track.getName().hashCode() == hash) {

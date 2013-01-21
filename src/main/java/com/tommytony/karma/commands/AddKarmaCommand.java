@@ -1,9 +1,7 @@
 package com.tommytony.karma.commands;
 
 import com.tommytony.karma.Karma;
-import com.tommytony.karma.KarmaGroup;
 import com.tommytony.karma.KarmaPlayer;
-import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,25 +21,24 @@ public class AddKarmaCommand implements CommandExecutor {
             karma.msg(sender, karma.config.getString("errors.badargs"));
             return false;
         }
-
+        Player addKarmaTarget = karma.server.getPlayer(args[1]);
+        if (addKarmaTarget == null) {
+            karma.msg(sender, karma.config.getString("errors.noplayer"));
+            return true;
+        }
+        KarmaPlayer addKarmaPlayer = karma.players.get(addKarmaTarget.getName());
+        if (addKarmaPlayer == null) {
+            throw new NullPointerException(addKarmaTarget.getName() + " is not a Karma player!");
+        }
+        int karmaToAdd;
         try {
-            Integer.parseInt(args[2]);
+            karmaToAdd = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED
-                    + "The third argument must be an integer!");
+            sender.sendMessage(ChatColor.RED + "The third argument must be an integer!");
             return true;
         }
-        List<Player> matches3 = karma.server.matchPlayer(
-                args[1]);
-        if (!matches3.isEmpty() && Integer.parseInt(args[2]) >= 0
-                && sender.hasPermission("karma.set")) {
-            KarmaPlayer playerToAddKarma = karma.players.get(matches3.get(0).getName());
-            karma.msg(sender, "Karma of " + matches3.get(0) + " changed");
-            karma.setAmount(matches3,
-                    Integer.parseInt(args[2]) + playerToAddKarma.getKarmaPoints());
-            return true;
-        }
+        karma.msg(sender, "Karma of " + addKarmaPlayer.getName() + " changed");
+        addKarmaPlayer.addKarma(karmaToAdd);
         return true;
-
     }
 }
