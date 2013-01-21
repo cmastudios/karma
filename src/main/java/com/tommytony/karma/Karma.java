@@ -219,7 +219,7 @@ public class Karma {
                 }
                 for (Player playerToMessage : server.getOnlinePlayers()) {
                     this.msg(playerToMessage, config.getString("promotion.message")
-                            .replace("<player>", playerToMessage.getName())
+                            .replace("<player>", player.getName())
                             .replace("<group>", group.getGroupName())
                             .replace("<groupcolor>", group.getChatColor().toString()));
                 }
