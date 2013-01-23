@@ -188,21 +188,7 @@ public class Karma {
                 }
             }
         }
-        //sort groups by point value
-        Collections.sort(groupList, new Comparator<KarmaGroup>() {
-        	
-        	public int compare(KarmaGroup par1, KarmaGroup par2) {
-        		if(par1.getKarmaPoints() == par2.getKarmaPoints()) {
-        			return 0;
-        		}
-        	    else if(par1.getKarmaPoints() > par2.getKarmaPoints()) {
-        			return 1;
-        		} else if(par1.getKarmaPoints() < par2.getKarmaPoints()) {
-        			return -1;
-        		}
-        		return 0;
-        	}
-        });
+        Collections.sort(groupList);
         if (groupList.isEmpty()) {
             // If player is new, give them default track
             return getDefaultTrack();
