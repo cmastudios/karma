@@ -182,7 +182,21 @@ public class Karma {
                 group = track.getNextGroup(group);
             }
         }
-        Collections.sort(groupList);
+        //Collections.sort(groupList);
+        Collections.sort(groupList, new Comparator<KarmaGroup>() {
+        	
+        	public int compare(KarmaGroup par1, KarmaGroup par2) {
+        		if(par1.getKarmaPoints() == par2.getKarmaPoints()) {
+        			return 0;
+        		}
+        	    else if(par1.getKarmaPoints() > par2.getKarmaPoints()) {
+        			return 1;
+        		} else if(par1.getKarmaPoints() < par2.getKarmaPoints()) {
+        			return -1;
+        		}
+        		return 0;
+        	}
+        });
         return highestGroup.get(groupList.get((groupList.size()-1)));
     }
 
