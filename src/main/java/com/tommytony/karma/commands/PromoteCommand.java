@@ -17,21 +17,22 @@ public class PromoteCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (args.length < 2) {
+        if(args.length != 2) {
             karma.msg(sender, karma.config.getString("errors.badargs"));
+            return false;
+        }
+        
+        Player promoteTarget = karma.server.getPlayer(args[1]);
+        if (promoteTarget == null) {
+            karma.msg(sender, karma.config.getString("errors.noplayer"));
             return true;
         }
-        Player promoteTarget = karma.server.getPlayer(args[1]);
         KarmaPlayer karmaPromoteTarget = karma.players.get(promoteTarget.getName());
         if (karmaPromoteTarget == null) {
             return true;
         }
 
         KarmaGroup currentGroup = karmaPromoteTarget.getTrack().getFirstGroup();
-        if (promoteTarget == null) {
-            karma.msg(sender, karma.config.getString("promote.messages.noplayer"));
-            return true;
-        }
         while (currentGroup != null) {
             if (karmaPromoteTarget.getKarmaPoints() < currentGroup.getKarmaPoints()) {
                 if (sender.hasPermission("karma.promote." + currentGroup.getGroupName())

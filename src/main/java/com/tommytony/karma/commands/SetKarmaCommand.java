@@ -17,9 +17,9 @@ public class SetKarmaCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (args.length < 3) {
+        if(args.length != 3) {
             karma.msg(sender, karma.config.getString("errors.badargs"));
-            return true;
+            return false;
         }
 
         try {
