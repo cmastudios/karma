@@ -17,6 +17,10 @@ public class AddKarmaCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (!sender.hasPermission("karma.set")) {
+            karma.msg(sender, karma.config.getString("errors.nopermission"));
+            return true;
+        }
         if(args.length != 3) {
             karma.msg(sender, karma.config.getString("errors.badargs"));
             return false;
