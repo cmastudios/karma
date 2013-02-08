@@ -95,14 +95,12 @@ public class KarmaPlayer {
         }
     }
     /**
-     * Gets the group that the player is in, based off of karma points instead
-     * of the player's permissions.
+     * Gets the group that the player is in, based off of permissions
      * @return the group
      * @throws NullPointerException if permissions do not match karma
      */
-    public KarmaGroup getGroup() {
-        KarmaGroup currentGroup = getTrack().getFirstGroup();
-        while (currentGroup != null) {
+    public KarmaGroup getGroupByPermissions() {
+        for (KarmaGroup currentGroup : getTrack()) {
             if (getKarmaPoints() >= currentGroup.getKarmaPoints()) {
                 String perm = "karma." + currentGroup.getGroupName();
                 if (getPlayer().isOnline() &&
@@ -123,10 +121,20 @@ public class KarmaPlayer {
                     return currentGroup;
                 }
             }
-            currentGroup = getTrack().getNextGroup(currentGroup);
         }
         return null;
     }
+    /**
+     * Gets the group that the player is in, based off of karma points
+     * @return the group
+     */
+    public KarmaGroup getGroup() {
+        return getTrack().getGroupOnBounds(karmaPoints);
+    }
+    /**
+     * Set a player to a group. Use for track switching only.
+     * @param group the group to change the player to
+     */
     public void setGroup(KarmaGroup group) {
         karma.runCommand(karma.config.getString("promotion.command").replace("<player>", getName()).replace("<group>", group.getGroupName()));
     }

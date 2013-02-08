@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tommytony</groupId>
     <artifactId>karma</artifactId>
-    <version>0.3-RC1</version>
+    <version>0.4-SNAPSHOT</version>
     <name>Karma</name>
     <url>http://cmastudios.me/wiki/Karma</url>
     <properties>
@@ -53,7 +53,6 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

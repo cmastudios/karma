@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class KarmaTrack implements Iterable<KarmaGroup> {
     // Ordered least to greatest karma point value
@@ -60,18 +61,17 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
      * @return the group in bounds or null if one can't be found
      */
     public KarmaGroup getGroupOnBounds(int karma) {
-    	for (KarmaGroup group : groups) {
+        for (KarmaGroup group : groups) {
             KarmaGroup nextGroup = this.getNextGroup(group);
             if ((group.getKarmaPoints() <= karma) && nextGroup == null) {
                 return group;
-            } else if ((group.getKarmaPoints() <= karma) 
+            } else if ((group.getKarmaPoints() <= karma)
                     && (karma < nextGroup.getKarmaPoints())) {
                 return group;
             }
-    	}
-    	return null;
+        }
+        return null;
     }
-    
     /**
      * Get the group with more karma than the specified group
      * @param previousGroup the group with less karma then the next
@@ -81,6 +81,21 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
         for (KarmaGroup nextGroup : groups) {
             if (nextGroup.getKarmaPoints() > previousGroup.getKarmaPoints()) {
                 return nextGroup;
+            }
+        }
+        return null;
+    }
+    /**
+     * Get the group with less karma than the specified group
+     * @param nextGroup the group with more karma then the next
+     * @return the group or null if it can't be found
+     */
+    public KarmaGroup getPreviousGroup(KarmaGroup nextGroup) {
+        ListIterator<KarmaGroup> li = groups.listIterator(groups.size());
+        while (li.hasPrevious()) {
+            KarmaGroup previousGroup = li.previous();
+            if (previousGroup.getKarmaPoints() < nextGroup.getKarmaPoints()) {
+                return previousGroup;
             }
         }
         return null;
@@ -110,6 +125,9 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
 
     public Iterator<KarmaGroup> iterator() {
         return groups.iterator();
+    }
+    public ListIterator<KarmaGroup> reverseListIterator() {
+        return groups.listIterator(groups.size());
     }
 
 }

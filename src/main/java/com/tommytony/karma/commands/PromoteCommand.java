@@ -32,15 +32,17 @@ public class PromoteCommand implements CommandExecutor {
             return true;
         }
 
-        KarmaGroup currentGroup = karmaPromoteTarget.getTrack().getFirstGroup();
-        while (currentGroup != null) {
+        for (KarmaGroup currentGroup : karmaPromoteTarget.getTrack()) {
             if (karmaPromoteTarget.getKarmaPoints() < currentGroup.getKarmaPoints()) {
                 if (sender.hasPermission("karma.promote." + currentGroup.getGroupName())
                         || sender.hasPermission("karma.promote.*")) {
                     karmaPromoteTarget.addKarma(currentGroup.getKarmaPoints() - karmaPromoteTarget.getKarmaPoints());
+                    if (karmaPromoteTarget.getGroupByPermissions() != currentGroup) {
+                        throw new NullPointerException("Attempted to promote player " + karmaPromoteTarget.getName() + " to group " + currentGroup.getGroupName() 
+                                + ", but after promotion, the player doesn't have " + currentGroup.getPermission() + "! Promote command configured incorrectly.");
+                    }
                     karma.msg(
-                            promoteTarget,
-                            karma.config.getString("promocommand.messages.promoted")
+                            promoteTarget, karma.config.getString("promocommand.messages.promoted")
                             .replace("<player>", promoteTarget.getName())
                             .replace("<group>", currentGroup.getGroupName()));
                     return true;
@@ -50,7 +52,6 @@ public class PromoteCommand implements CommandExecutor {
                 }
 
             }
-            currentGroup = karmaPromoteTarget.getTrack().getNextGroup(currentGroup);
         }
         return false;
     }

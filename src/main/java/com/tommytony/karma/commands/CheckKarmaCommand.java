@@ -40,7 +40,7 @@ public class CheckKarmaCommand implements CommandExecutor {
                     karma.config.getString("check.others.message")
                     .replace("<player>",checkOtherTarget.getName())
                     .replace("<points>", Integer.toString(karmaCheckOtherTarget.getKarmaPoints()))
-                    .replace( "<curgroupcolor>", karma.getPlayerGroupColor(karmaCheckOtherTarget).toString()));
+                    .replace( "<curgroupcolor>", karmaCheckOtherTarget.getGroup().getChatColor().toString()));
         } else {
             karma.msg(sender, karma.config.getString("errors.noplayer"));
         }
