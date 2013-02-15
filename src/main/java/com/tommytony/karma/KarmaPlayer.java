@@ -44,6 +44,10 @@ public class KarmaPlayer {
         if (pointsToRemove > 0) {
             int before = this.karmaPoints;
             this.karmaPoints -= pointsToRemove;
+            // Prevent losing more karma than the start group in the player's track
+            if (this.karmaPoints < this.track.getFirstGroup().getKarmaPoints()) {
+                this.karmaPoints = this.track.getFirstGroup().getKarmaPoints();
+            }
             this.karma.checkForDemotion(this, before, this.karmaPoints, automatic);
             this.karma.getKarmaDatabase().put(this);
         }
