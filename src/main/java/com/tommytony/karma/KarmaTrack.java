@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * List of groups that a player can be promoted/demoted between.
+ */
 public class KarmaTrack implements Iterable<KarmaGroup> {
     // Ordered least to greatest karma point value
     private String name;
@@ -17,8 +20,8 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
         this.first = false;
     }
     /**
-     * Set all groups in the track
-     * @param groups the groups to change to
+     * Set all groups in the track.
+     * @param groups the groups to change to.
      */
     protected void setGroups(List<KarmaGroup> groups) {
         // Sort the groups by karma point value
@@ -27,9 +30,9 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
         this.groups = groups;
     }
     /**
-     * Get a group by name
-     * @param name the group's name
-     * @return the group or null if it can't be found
+     * Get a group by name.
+     * @param name the group's name.
+     * @return the group or null if it can't be found.
      */
     public KarmaGroup getGroup(String name) {
         for (KarmaGroup group : groups) {
@@ -43,9 +46,9 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
         return groups.get(0);
     }
     /**
-     * Get a group by karma point value
-     * @param karma the amount of karma the group requires
-     * @return the group or null if it can't be found
+     * Get a group by karma point value.
+     * @param karma the amount of karma the group requires.
+     * @return the group or null if it can't be found.
      */
     public KarmaGroup getGroup(int karma) {
         for (KarmaGroup group : groups) {
@@ -56,9 +59,9 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
         return null;
     }
     /**
-     * Get a group in the track based on a player's karma
-     * @param karma the amount of karma that falls in the group
-     * @return the group in bounds or null if one can't be found
+     * Get a group in the track based on a player's karma.
+     * @param karma the amount of karma that falls in the group.
+     * @return the group in bounds or null if one can't be found.
      */
     public KarmaGroup getGroupOnBounds(int karma) {
         for (KarmaGroup group : groups) {
@@ -73,9 +76,9 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
         return null;
     }
     /**
-     * Get the group with more karma than the specified group
-     * @param previousGroup the group with less karma then the next
-     * @return the group or null if it can't be found
+     * Get the group with more karma than the specified group.
+     * @param previousGroup the group with less karma then the next.
+     * @return the group or null if it can't be found.
      */
     public KarmaGroup getNextGroup(KarmaGroup previousGroup) {
         for (KarmaGroup nextGroup : groups) {
@@ -102,22 +105,24 @@ public class KarmaTrack implements Iterable<KarmaGroup> {
     }
 
     /**
-     * Get the name of the track
-     * @return the name
+     * Get the name of the track.
+     * @return the name.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @return the first
+     * Check if this track is the first/default track.
+     * @return true if this track is first, false otherwise.
      */
     public boolean isFirst() {
         return first;
     }
 
     /**
-     * @param first the first to set
+     * Set this track as the first/default track or unset it.
+     * @param first true if this is the first track, false if not.
      */
     public void setFirst(boolean first) {
         this.first = first;

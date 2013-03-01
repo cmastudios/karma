@@ -2,6 +2,9 @@ package com.tommytony.karma;
 
 import org.bukkit.OfflinePlayer;
 
+/**
+ * The base player class for use in karma.
+ */
 public class KarmaPlayer {
 
     private final Karma karma;
@@ -20,6 +23,11 @@ public class KarmaPlayer {
         this.track = track;
     }
 
+    /**
+     * Adds a defined amount of karma points to a player.
+     * This method will check if a player needs a promotion.
+     * @param pointsToAdd Amount of karma points to add
+     */
     public void addKarma(int pointsToAdd) {
         if (pointsToAdd > 0) {
             int before = this.karmaPoints;
@@ -29,10 +37,21 @@ public class KarmaPlayer {
         }
     }
 
+    /**
+     * Removes a defined amount of karma points from a player.
+     * This method will check if a player needs a demotion.
+     * @param pointsToRemove Amount of karma points to remove
+     */
     public void removeKarma(int pointsToRemove) {
         this.removeKarma(pointsToRemove, false);
     }
 
+    /**
+     * Removes a defined amount of karma points from a player.
+     * This method will check if a player needs a demotion.
+     * This method will not demote the player to their track's start group.
+     * @param pointsToRemove Amount of karma points to remove
+     */
     public void removeKarmaAutomatic(int pointsToRemove) {
         this.removeKarma(pointsToRemove, true);
     }
@@ -53,36 +72,65 @@ public class KarmaPlayer {
         }
     }
 
+    /**
+     * Get the player's name
+     * @return the player's name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets how many karma points the player currently has.
+     * @return the amount of karma points
+     */
     public int getKarmaPoints() {
         return karmaPoints;
     }
 
+    /**
+     * Gets the last time the player did an action which made the player un-AFK.
+     * @return the last action time in milliseconds since the Unix epoch
+     */
     public long getLastActivityTime() {
         return lastActivityTime;
     }
 
+    /**
+     * Sets a player's last activity time to the current time.
+     */
     public void ping() {
         this.lastActivityTime = System.currentTimeMillis();
     }
 
+    /**
+     * Sets a player's last gift time to the current time.
+     */
     public void updateLastGiftTime() {
         this.lastGift = System.currentTimeMillis();
     }
 
+    /**
+     * Gets the last time the player gifted a karma point to another player.
+     * @return the last action time in milliseconds since the Unix epoch
+     */
     public long getLastGiftTime() {
         return lastGift;
     }
 
+    /**
+     * Checks if a player can gift based on their last gift time.
+     * This will not check if the player has the <code>karma.gift</code>
+     * permission.
+     * @return true if the player can gift, false otherwise
+     */
     public boolean canGift() {
         long since = System.currentTimeMillis() - getLastGiftTime();
         return since > 3600 * 1000;
     }
 
     /**
+     * Gets the player's current track.
      * @return the track
      */
     public KarmaTrack getTrack() {
@@ -90,6 +138,9 @@ public class KarmaPlayer {
     }
 
     /**
+     * Set the player's current track.
+     * Warning: if this track cannot be found from the config file during a
+     * reload, then it will break.
      * @param track the track to set
      */
     public void setTrack(KarmaTrack track) {
@@ -98,8 +149,9 @@ public class KarmaPlayer {
             this.addKarma(track.getFirstGroup().getKarmaPoints() - this.getKarmaPoints());
         }
     }
+
     /**
-     * Gets the group that the player is in, based off of permissions
+     * Gets the group that the player is in by their current permissions.
      * @return the group
      * @throws NullPointerException if permissions do not match karma
      */
@@ -119,7 +171,7 @@ public class KarmaPlayer {
                             + currentGroup.getGroupName() + " yet lacks the permission for it! "
                             + "Permissions configured incorrectly (Did you forget inheritance?)");
                 }
-                if ((getTrack().getNextGroup(currentGroup) != null 
+                if ((getTrack().getNextGroup(currentGroup) != null
                         && getKarmaPoints() < getTrack().getNextGroup(currentGroup).getKarmaPoints())
                         || (getTrack().getNextGroup(currentGroup) == null)) {
                     return currentGroup;
@@ -128,13 +180,15 @@ public class KarmaPlayer {
         }
         return null;
     }
+
     /**
-     * Gets the group that the player is in, based off of karma points
+     * Gets the group that the player is in by their amount of karma points.
      * @return the group
      */
     public KarmaGroup getGroup() {
         return getTrack().getGroupOnBounds(karmaPoints);
     }
+
     /**
      * Set a player to a group. Use for track switching only.
      * @param group the group to change the player to
@@ -142,6 +196,11 @@ public class KarmaPlayer {
     public void setGroup(KarmaGroup group) {
         karma.runCommand(karma.config.getString("promotion.command").replace("<player>", getName()).replace("<group>", group.getGroupName()));
     }
+
+    /**
+     * Get the Bukkit player.
+     * @return the player
+     */
     public OfflinePlayer getPlayer() {
         return karma.server.getOfflinePlayer(getName());
     }
