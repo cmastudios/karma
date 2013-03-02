@@ -61,10 +61,10 @@ public class Karma {
                 // check if player needs a promo, in case perms got wiped
                 // BONUS: this lets you change perms systems without having
                 // to migrate - ex: just change the GM commands to bPerms
-                KarmaGroup currentGroup = karmaPlayer.getTrack().getFirstGroup();
-                while (currentGroup != null) {
-                    if (karmaPlayer.getKarmaPoints() >= currentGroup.getKarmaPoints()
-                            && !player.hasPermission("karma." + currentGroup.getGroupName())
+                for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
+                    if (karmaPlayer.getKarmaPoints() >= currentGroup.getKarmaPoints() // Player has enough karma for this rank
+                            && !player.hasPermission(currentGroup.getPermission()) // and he doesn't have permission for it...
+                            // and he doesn't have the karma for his next group
                             && !(karmaPlayer.getTrack().getNextGroup(currentGroup) != null && karmaPlayer.getKarmaPoints() >= karmaPlayer.getTrack().getNextGroup(currentGroup).getKarmaPoints())) {
                         // either doesn't have a next rank or can't beat the
                         // next rank's k points, we found the right rank
@@ -74,27 +74,20 @@ public class Karma {
                             this.msg(playerOnline,
                                     config.getString("promotion.message").replace("<player>", playerName).replace("<group>", currentGroup.getGroupName()).replace("<groupcolor>", currentGroup.getChatColor().toString()));
                         }//end for
-
                     }//end if
-
-                    currentGroup = karmaPlayer.getTrack().getNextGroup(currentGroup);
                 }//end while	
                 // Check if a player has enough karma points for his rank, if not, add them
-                // This allows easy installation of karma: no having to change preexisting users' karma to their rank's karma	
-                currentGroup = karmaPlayer.getTrack().getFirstGroup();
-                while (currentGroup != null) {
+                // This prevents problems when server admins use their permission manager's commands for promotions instead of karma's
+                // TODO: add configuration option to disable this for setups with one mysql db for karma but multiple servers
+                for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
                     if (karmaPlayer.getKarmaPoints() < currentGroup.getKarmaPoints()
-                            && player.hasPermission("karma." + currentGroup.getGroupName())) {
-
+                            && player.hasPermission(currentGroup.getPermission())) {
                         this.setAmount(player, currentGroup.getKarmaPoints());
-
-
                     }//end if
-
-                    currentGroup = karmaPlayer.getTrack().getNextGroup(currentGroup);
                 }//end while
 
                 // check for last activity, remove one karma point per day off
+                // TODO: make time and loss configurable
                 long gone = System.currentTimeMillis()
                         - karmaPlayer.getLastActivityTime();
                 int howManyDays = (int) Math.floor(gone / 86400000L);
@@ -129,10 +122,8 @@ public class Karma {
         int initialKarma = 0;
         int karmaToNext = 0;
         KarmaTrack track = getInitialTrack(player);
-        KarmaGroup group = track.getFirstGroup();
-        while (group != null) {
-            String perm = "karma." + group.getGroupName();
-            if (player.hasPermission(perm)) {
+        for (KarmaGroup group : track) {
+            if (player.hasPermission(group.getPermission())) {
                 initialKarma = group.getKarmaPoints();
                 if (track.getNextGroup(group) != null) {
                     karmaToNext = track.getNextGroup(group).getKarmaPoints()
@@ -145,7 +136,6 @@ public class Karma {
                 // If they don't have permission for the next group in the track, we're done here
                 break;
             }
-            group = track.getNextGroup(group);
         }
         // Extra karma added on initial import
         if (initialKarma > 0 && config.getBoolean("import.bonus")) {
@@ -452,7 +442,7 @@ public class Karma {
     }
 
     private String parseColor(String message) {
-        return message.replaceAll("&([0-9a-zA-Z])", ChatColor.COLOR_CHAR + "$1");
+        return ChatColor.translateAlternateColorCodes('&', message);
     }
 
     public Map<String, KarmaPlayer> getPlayers() {

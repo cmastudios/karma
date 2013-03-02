@@ -3,14 +3,17 @@ package com.tommytony.karma;
 import com.tommytony.karma.commands.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class KarmaPlugin extends JavaPlugin {
+public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
 
     protected Karma karma;
     
@@ -134,6 +137,39 @@ public class KarmaPlugin extends JavaPlugin {
         }
 
         return true;
+    }
+
+    public Map<String, KarmaPlayer> getPlayers() {
+        return karma.players;
+    }
+
+    public KarmaPlayer getPlayer(String player) {
+        return karma.players.get(player);
+    }
+
+    public List<KarmaTrack> getTracks() {
+        return karma.tracks;
+    }
+
+    public KarmaTrack getDefaultTrack() {
+        return karma.getDefaultTrack();
+    }
+
+    public KarmaTrack getTrack(String name) {
+        return karma.getTrack(name);
+    }
+
+    public KarmaTrack getTrack(long hash) {
+        return karma.getTrack(hash);
+    }
+
+    public void reloadPlayers() {
+        karma.players = new HashMap<String, KarmaPlayer>();
+        new LoadPlayers(karma).run();
+    }
+
+    public void reloadTracks() {
+        karma.loadTracks();
     }
 
 }
