@@ -449,6 +449,14 @@ public class Karma {
         return players;
     }
 
+    public KarmaPlayer getPlayer(String player) {
+        if (players.containsKey(player)) {
+            return players.get(player);
+        } else {
+            return db.get(player);
+        }
+    }
+
     public Database getKarmaDatabase() {
         return db;
     }

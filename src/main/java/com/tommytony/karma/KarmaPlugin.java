@@ -144,7 +144,7 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
     }
 
     public KarmaPlayer getPlayer(String player) {
-        return karma.players.get(player);
+        return karma.getPlayer(player);
     }
 
     public List<KarmaTrack> getTracks() {
