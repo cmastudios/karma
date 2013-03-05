@@ -63,6 +63,7 @@ public class ImportTest {
         when(p.hasPermission("karma.recruit")).thenReturn(true);
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(config.getBoolean("import.bonus")).thenReturn(false);
+        when(config.getString("newplayer.message")).thenReturn("newplayer.message");
         karma.config = config;
         KarmaPlayerListener listener = new KarmaPlayerListener(karma);
         listener.onPlayerJoin(event);
@@ -76,6 +77,7 @@ public class ImportTest {
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(config.getBoolean("import.bonus")).thenReturn(true);
         when(config.getDouble("import.percent")).thenReturn(0.25);
+        when(config.getString("newplayer.message")).thenReturn("newplayer.message");
         karma.config = config;
         KarmaPlayerListener listener = new KarmaPlayerListener(karma);
         listener.onPlayerJoin(event);
