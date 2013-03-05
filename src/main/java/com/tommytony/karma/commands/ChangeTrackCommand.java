@@ -4,6 +4,7 @@ import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaGroup;
 import com.tommytony.karma.KarmaPlayer;
 import com.tommytony.karma.KarmaTrack;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,22 +23,18 @@ public class ChangeTrackCommand implements CommandExecutor {
             karma.msg(sender, karma.config.getString("errors.badargs"));
             return false;
         }
-        Player chTrackTarget = karma.server.getPlayer(args[1]);
+        OfflinePlayer chTrackTarget = karma.getBukkitPlayer(args[1]);
         if (chTrackTarget == null) {
             karma.msg(sender, karma.config.getString("errors.noplayer"));
             return true;
         }
-        KarmaPlayer chKarmaTrackTarget = karma.players.get(chTrackTarget.getName());
+        KarmaPlayer chKarmaTrackTarget = karma.getPlayer(chTrackTarget.getName());
         if (chKarmaTrackTarget == null) {
+            karma.msg(sender, karma.config.getString("errors.noplayer"));
             return true;
         }
 
-        KarmaTrack targetTrack = null;
-        for (KarmaTrack track : karma.tracks) {
-            if (track.getName().equals(args[2])) {
-                targetTrack = track;
-            }
-        }
+        KarmaTrack targetTrack = karma.getTrack(args[2]);
         if (targetTrack == null) {
             karma.msg(sender, karma.config.getString("errors.notrack"));
             return true;
@@ -52,15 +49,13 @@ public class ChangeTrackCommand implements CommandExecutor {
         }
         // Will automatically add karma to bump the player's karma up to the first group in the track
         chKarmaTrackTarget.setTrack(targetTrack);
-        for (KarmaGroup currentGroup : targetTrack) {
-            if (chKarmaTrackTarget.getKarmaPoints() >= currentGroup.getKarmaPoints()) {
-                chKarmaTrackTarget.setGroup(currentGroup);
+        chKarmaTrackTarget.setGroup(targetTrack.getGroupOnBounds(chKarmaTrackTarget.getKarmaPoints()));
+        if (chTrackTarget.isOnline()) {
+            if (chKarmaTrackTarget.getGroupByPermissions() != chKarmaTrackTarget.getGroup()) {
+                throw new NullPointerException("Attempted to promote player " + chKarmaTrackTarget.getName() + " to group " + chKarmaTrackTarget.getGroup().getGroupName()
+                        + "during a track change, but after promotion, the player doesn't have " + chKarmaTrackTarget.getGroup().getPermission() + "! Promote command "
+                        + "configured incorrectly.");
             }
-        }
-        if (chKarmaTrackTarget.getGroupByPermissions() != chKarmaTrackTarget.getGroup()) {
-            throw new NullPointerException("Attempted to promote player " + chKarmaTrackTarget.getName() + " to group " + chKarmaTrackTarget.getGroup().getGroupName()
-                    + "during a track change, but after promotion, the player doesn't have " + chKarmaTrackTarget.getGroup().getPermission() + "! Promote command "
-                    + "configured incorrectly.");
         }
         String msg = karma.config.getString("changetrack.message")
                 .replace("<player>", chTrackTarget.getName())

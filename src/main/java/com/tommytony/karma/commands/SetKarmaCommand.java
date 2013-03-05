@@ -2,12 +2,10 @@ package com.tommytony.karma.commands;
 
 import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaPlayer;
-import java.util.List;
-import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public class SetKarmaCommand implements CommandExecutor {
 
@@ -26,24 +24,30 @@ public class SetKarmaCommand implements CommandExecutor {
             karma.msg(sender, karma.config.getString("errors.badargs"));
             return false;
         }
-        Player setKarmaTarget = karma.server.getPlayer(args[1]);
+        OfflinePlayer setKarmaTarget = karma.getBukkitPlayer(args[1]);
         if (setKarmaTarget == null) {
             karma.msg(sender, karma.config.getString("errors.noplayer"));
             return true;
         }
-        KarmaPlayer setKarmaPlayer = karma.players.get(setKarmaTarget.getName());
+        KarmaPlayer setKarmaPlayer = karma.getPlayer(setKarmaTarget.getName());
         if (setKarmaPlayer == null) {
-            throw new NullPointerException(setKarmaTarget.getName() + " is not a Karma player!");
+            karma.msg(sender, karma.config.getString("errors.noplayer"));
         }
         int karmaToSet;
         try {
             karmaToSet = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED + "The third argument must be an integer!");
-            return true;
+            throw new IllegalArgumentException("The amount of points to set must be an integer.");
         }
-        karma.msg(sender, "Karma of " + setKarmaPlayer.getName() + " changed");
-        karma.setAmount(setKarmaTarget, karmaToSet);
+        if (karmaToSet < 0) {
+            throw new IllegalArgumentException("The amount of karma points to set must be greather than zero.");
+        }
+        if (karmaToSet == setKarmaPlayer.getKarmaPoints()) {
+            throw new IllegalArgumentException("The amount of karma points to set must be different than the player's current karma points.");
+        }
+        karma.msg(sender, "Karma of " + setKarmaPlayer.getName() + " set to " + karmaToSet + ".");
+        karma.log.info(setKarmaPlayer.getName() + "'s karma points set to " + karmaToSet + " from " + setKarmaPlayer.getKarmaPoints() + ".");
+        setKarmaPlayer.setKarmaPoints(karmaToSet);
         return true;
     }
 }
