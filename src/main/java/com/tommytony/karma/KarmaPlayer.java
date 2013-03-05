@@ -1,5 +1,6 @@
 package com.tommytony.karma;
 
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 
 /**
@@ -32,7 +33,8 @@ public class KarmaPlayer {
         if (pointsToAdd > 0) {
             int before = this.karmaPoints;
             this.karmaPoints += pointsToAdd;
-            this.karma.checkForPromotion(this, before, this.karmaPoints);
+//            this.karma.checkForPromotion(this, before, this.karmaPoints);
+            this.updatePermissions(before, this.karmaPoints);
             this.karma.getKarmaDatabase().put(this);
         }
     }
@@ -67,8 +69,29 @@ public class KarmaPlayer {
             if (this.karmaPoints < this.track.getFirstGroup().getKarmaPoints()) {
                 this.karmaPoints = this.track.getFirstGroup().getKarmaPoints();
             }
-            this.karma.checkForDemotion(this, before, this.karmaPoints, automatic);
+//            this.karma.checkForDemotion(this, before, this.karmaPoints, automatic);
+            this.updatePermissions(before, this.karmaPoints);
             this.karma.getKarmaDatabase().put(this);
+        }
+    }
+
+    /**
+     * Set a player's karma point value directly.
+     * @param amount the amount of karma points.
+     * @throws IllegalArgumentException amount to set is less than zero.
+     */
+    public void setKarmaPoints(int amount) {
+        if (amount != this.getKarmaPoints()) {
+            if (amount >= 0) {
+                int before = this.getKarmaPoints();
+                if (amount > this.getKarmaPoints()) {
+                    this.addKarma(amount - this.getKarmaPoints());
+                } else {
+                    this.removeKarma(this.getKarmaPoints() - amount);
+                }
+            } else {
+                throw new IllegalArgumentException("amount cannot be a negative number.");
+            }
         }
     }
 
@@ -148,6 +171,7 @@ public class KarmaPlayer {
         if (this.getKarmaPoints() < track.getFirstGroup().getKarmaPoints()) {
             this.addKarma(track.getFirstGroup().getKarmaPoints() - this.getKarmaPoints());
         }
+        this.karma.getKarmaDatabase().put(this);
     }
 
     /**
@@ -179,6 +203,64 @@ public class KarmaPlayer {
             }
         }
         return null;
+    }
+
+    /**
+     * Updates permissions for a promote/demote on the same track.
+     * This does not handle track switches.
+     * @param before karma points before change.
+     * @param after karma points after change.
+     * @see #setGroup(com.tommytony.karma.KarmaGroup) Use for track changes.
+     */
+    protected void updatePermissions(int before, int after) {
+        KarmaGroup oldGroup = this.track.getGroupOnBounds(before);
+        KarmaGroup newGroup = this.track.getGroupOnBounds(after);
+        if (oldGroup == null || newGroup == null) {
+            throw new NullPointerException("Could not find player's group after karma change.");
+        }
+        if (oldGroup == newGroup) {
+            return;
+        }
+        switch (oldGroup.compareTo(newGroup)) {
+            case -1:
+                karma.runCommand(karma.config.getString("promotion.command")
+                        .replace("<player>", name)
+                        .replace("<group>", newGroup.getGroupName()));
+                if (this.getPlayer().isOnline()) {
+                    if (this.getGroupByPermissions() != newGroup) {
+                        throw new NullPointerException("Attempted to promote player " + this.name + " to group " + newGroup.getGroupName()
+                                + ", but after promotion, the player doesn't have " + newGroup.getPermission() + "! Promote command configured incorrectly.");
+                    }
+                }
+                karma.msg(this.karma.server.getOnlinePlayers(), this.karma.config.getString("promotion.message")
+                        .replace("<player>", name)
+                        .replace("<group>", newGroup.getGroupName())
+                        .replace("<groupcolor>", newGroup.getChatColor().toString()));
+                karma.log.info(name + " promoted to " + newGroup.getGroupName());
+                break;
+            case 1:
+                if (newGroup.isFirstGroup(this.track) && this.track.isFirst()
+                        && !karma.config.getBoolean("demotion.demotetofirstgroup")) {
+                    break; // Prevents players from being demoted to the first group automatically
+                }
+                karma.runCommand(karma.config.getString("demotion.command")
+                        .replace("<player>", name)
+                        .replace("<group>", newGroup.getGroupName()));
+                if (this.getPlayer().isOnline()) {
+                    if (this.getGroupByPermissions() != newGroup) {
+                        throw new NullPointerException("Attempted to demote player " + this.name + " to group " + newGroup.getGroupName()
+                                + ", but after demotion, the player isn't in this group! Demote command configured incorrectly.");
+                    }
+                }
+                karma.msg(this.karma.server.getOnlinePlayers(), this.karma.config.getString("demotion.message")
+                        .replace("<player>", name)
+                        .replace("<group>", newGroup.getGroupName())
+                        .replace("<groupcolor>", newGroup.getChatColor().toString()));
+                karma.log.info(name + " demoted to " + newGroup.getGroupName());
+                break;
+            default:
+                break;
+        }
     }
 
     /**
