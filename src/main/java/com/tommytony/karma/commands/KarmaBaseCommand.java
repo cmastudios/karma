@@ -21,7 +21,7 @@ public class KarmaBaseCommand implements CommandExecutor {
             sender.sendMessage("This command cannot be used by console");
             return true;
         }
-        KarmaPlayer karmaCheckPlayer = karma.players.get(((Player) sender).getName());
+        KarmaPlayer karmaCheckPlayer = karma.getPlayer(sender.getName());
         if (karmaCheckPlayer != null) {
             karma.msg(sender, karma.config.getString("check.self.message")
                     .replace("<points>", Integer.toString(karmaCheckPlayer.getKarmaPoints()))

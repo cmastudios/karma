@@ -3,10 +3,10 @@ package com.tommytony.karma.commands;
 import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaPlayer;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public class AddKarmaCommand implements CommandExecutor {
 
@@ -25,14 +25,15 @@ public class AddKarmaCommand implements CommandExecutor {
             karma.msg(sender, karma.config.getString("errors.badargs"));
             return false;
         }
-        Player addKarmaTarget = karma.server.getPlayer(args[1]);
+        OfflinePlayer addKarmaTarget = karma.getBukkitPlayer(args[1]);
         if (addKarmaTarget == null) {
             karma.msg(sender, karma.config.getString("errors.noplayer"));
             return true;
         }
-        KarmaPlayer addKarmaPlayer = karma.players.get(addKarmaTarget.getName());
+        KarmaPlayer addKarmaPlayer = karma.getPlayer(addKarmaTarget.getName());
         if (addKarmaPlayer == null) {
-            throw new NullPointerException(addKarmaTarget.getName() + " is not a Karma player!");
+            karma.msg(sender, karma.config.getString("errors.noplayer"));
+            return true;
         }
         int karmaToAdd;
         try {

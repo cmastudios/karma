@@ -3,6 +3,7 @@ package com.tommytony.karma;
 import java.util.*;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -188,7 +189,11 @@ public class Karma {
         return groupList.get((groupList.size()-1)).getTrack(tracks);
     }
 
+    @Deprecated
     public void checkForPromotion(KarmaPlayer player, int before, int after) {
+        if (!player.getPlayer().isOnline()) {
+            return;
+        }
         Player playerForPromotion = player.getPlayer().getPlayer();
         for (KarmaGroup group : player.getTrack()) {
             String perm = group.getPermission();
@@ -217,7 +222,11 @@ public class Karma {
         }
     }
 
+    @Deprecated
     public void checkForDemotion(KarmaPlayer player, int before, int after, boolean automatic) {
+        if (!player.getPlayer().isOnline()) {
+            return;
+        }
         Player playerForDemotion = player.getPlayer().getPlayer();
         ListIterator<KarmaGroup> li = player.getTrack().reverseListIterator();
         while (li.hasPrevious()) {
@@ -400,20 +409,37 @@ public class Karma {
     }
 
     public void msg(CommandSender destination, String message) {
-        if (message == null || "".equals(message)) {
-            return;
+        for (String s : this.processMessage(message)) {
+            destination.sendMessage(s);
         }
-        
+    }
+
+    public void msg(List<CommandSender> destinations, String message) {
+        for (CommandSender dest : destinations) {
+            this.msg(dest, message);
+        }
+    }
+
+    public void msg(CommandSender[] destinations, String message) {
+        this.msg(Arrays.asList(destinations), message);
+    }
+
+    protected List<String> processMessage(String message) {
+        if (message == null || "".equals(message)) {
+            throw new NullPointerException("message cannot be null");
+        }
         message = message.replaceAll("<NEWLINE>", "\n");
+        List<String> ret = new ArrayList<String>();
         if (message.contains("\n")) {
             for (String s : message.split("\n")) {
-                destination.sendMessage(parseColor(config.getString("prefix")
-                        + s));
+                ret.add(parseColor(config.getString("prefix") + s));
             }
-            return;
+            return ret;
         }
-        destination.sendMessage(parseColor(config.getString("prefix") + message));
+        ret.add(parseColor(config.getString("prefix") + message));
+        return ret;
     }
+
     /**
      * Get a track by name
      * @param name the tracks name
@@ -447,6 +473,26 @@ public class Karma {
 
     public Map<String, KarmaPlayer> getPlayers() {
         return players;
+    }
+
+    public KarmaPlayer getPlayer(String player) {
+        if (players.containsKey(player)) {
+            return players.get(player);
+        } else {
+            return db.get(player);
+        }
+    }
+
+    public OfflinePlayer getBukkitPlayer(String player) {
+        if (server.getPlayer(player) == null) {
+            if (server.getOfflinePlayer(player).hasPlayedBefore()) {
+                return server.getOfflinePlayer(player);
+            } else {
+                return null;
+            }
+        } else {
+            return server.getPlayer(player);
+        }
     }
 
     public Database getKarmaDatabase() {
