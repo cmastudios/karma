@@ -1,6 +1,8 @@
 package com.tommytony.karma;
 
-import org.bukkit.ChatColor;
+import com.tommytony.war.Team;
+import com.tommytony.war.War;
+import com.tommytony.war.Warzone;
 import org.bukkit.OfflinePlayer;
 
 /**
@@ -285,5 +287,57 @@ public class KarmaPlayer {
      */
     public OfflinePlayer getPlayer() {
         return karma.server.getOfflinePlayer(getName());
+    }
+
+    /**
+     * Check if a player is AFK.
+     * AFK players do not receive karma in a karma party.
+     * @return true if the player is AFK, false otherwise
+     */
+    public boolean isAfk() {
+        long activeInterval = System.currentTimeMillis() - this.getLastActivityTime();
+        int minutesAfk = (int) Math.floor(activeInterval / (1000 * 60));
+        return minutesAfk >= 10;
+    }
+    /**
+     * Check if a player is playing in a warzone.
+     * @return true if player is playing war, false otherwise
+     */
+    public boolean isPlayingWar() {
+        if (!karma.warEnabled) {
+            throw new NullPointerException("The war plugin is not enabled");
+        }
+        if (Warzone.getZoneByPlayerName(name) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Check if the player has made a warzone which people are currently playing
+     * in.
+     * Notice: this will only return true if players are playing in this
+     * player's warzone actively.
+     * @return true if player has a warzone, false otherwise
+     */
+    public boolean hasActiveWarzone() {
+        if (!karma.warEnabled) {
+            throw new NullPointerException("The war plugin is not enabled");
+        }
+        for (Warzone zone : War.war.getWarzones()) {
+            for (String author : zone.getAuthors()) {
+                if (author.equals(name) && zone.isEnoughPlayers() && this.getPlayersInWarzone(zone) > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private int getPlayersInWarzone(Warzone zone) {
+        int players = 0;
+        for (Team team : zone.getTeams()) {
+            players += team.getPlayers().size();
+        }
+        return players;
     }
 }
