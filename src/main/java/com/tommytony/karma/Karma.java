@@ -98,7 +98,7 @@ public class Karma {
                     karmaPlayer.removeKarmaAutomatic(howManyDays);
                     StringBuilder message = new StringBuilder();
                     message.append(player.getName()).append(" lost ").append(before - karmaPlayer.getKarmaPoints()).append(" karma points.");
-                    log.info(message.toString());
+                    log.finer(message.toString());
                 }
 
                 // update last activity
@@ -114,8 +114,7 @@ public class Karma {
             db.put(karmaPlayer);
 
             this.msg(player, config.getString("newplayer.message"));
-            log.info("Karma> " + player.getName() + " created with "
-                    + initialKarma + " karma points");
+            log.finer(player.getName() + " created with " + initialKarma + " karma points");
         }
     }
 
@@ -361,7 +360,7 @@ public class Karma {
                 - config.getInt("party.time.minimum"));
         // 20 ticks/second, 60 seconds/min
         int ticks = minutes * 20 * 60;
-        log.info("Next karma party in " + minutes + " minutes or " + ticks + " ticks.");
+        log.fine("Next karma party in " + minutes + " minutes or " + ticks + " ticks.");
         return ticks;
     }
     protected void loadTracks() {

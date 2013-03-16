@@ -38,7 +38,7 @@ public class KarmaParty implements Runnable {
             }
         }
         if (playerList.toString().length() > 0) {
-            this.karma.log.info(playerList.toString() + " gained " + totalDistributedKarma + " karma");
+            karma.log.fine(playerList.toString() + " gained a total of " + totalDistributedKarma + " karma points.");
         }
 
         // save
