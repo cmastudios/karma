@@ -3,12 +3,21 @@ package com.tommytony.karma;
 import com.google.common.collect.ImmutableList;
 import com.tommytony.karma.commands.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.Properties;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -19,7 +28,7 @@ import org.bukkit.util.StringUtil;
 public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
 
     protected Karma karma;
-    
+
     //Called when bukkit disables plugin
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(this);
@@ -38,7 +47,7 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
         // Setup config
         saveDefaultConfig();
         karma.config = getConfig();
-        
+
         try {
             karma.config.load(new File("plugins/Karma/config.yml"));
         } catch (IOException e) {
@@ -54,6 +63,51 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
         // Init data
         karma.players = new HashMap<String, KarmaPlayer>();
         karma.db = new Database(karma);
+        karma.messages = ResourceBundle.getBundle("messages");
+        File externalMessagesFile = new File(this.getDataFolder() + File.separator + "messages.properties");
+        if (externalMessagesFile.exists()) {
+            Properties prop = new Properties();
+            InputStream in = null;
+            OutputStream os = null;
+            try {
+                in = new FileInputStream(externalMessagesFile);
+                prop.load(in);
+                in.close();
+                boolean missingkey = false;
+                for (String key : karma.messages.keySet()) {
+                    if (!prop.containsKey(key)) {
+                        if (!missingkey) {
+                            missingkey = true;
+                            karma.log.info("Updating keys in external messages.properties file.");
+                        }
+                        prop.setProperty(key, karma.messages.getString(key));
+                    }
+                }
+                os = new FileOutputStream(externalMessagesFile);
+                prop.store(os, null);
+                os.close();
+                in = new FileInputStream(externalMessagesFile);
+                karma.messages = new PropertyResourceBundle(in);
+            } catch (IOException ex) {
+                karma.log.warning("Cannot load external messages file, defaulting to internal messages.");
+                karma.messages = ResourceBundle.getBundle("messages");
+            } catch (MissingResourceException ex) {
+                karma.log.warning("Cannot load external messages file, defaulting to internal messages.");
+                karma.messages = ResourceBundle.getBundle("messages");
+            } finally {
+                try {
+                    if (in != null) {
+                        in.close();
+                    }
+                    if (os != null) {
+                        os.close();
+                    }
+                } catch (IOException ex) {
+                    karma.log.log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
 
         // Load karma groups
         karma.loadTracks();
