@@ -187,7 +187,7 @@ public class KarmaPlayer {
     public KarmaGroup getGroupByPermissions() {
         for (KarmaGroup currentGroup : getTrack()) {
             if (getKarmaPoints() >= currentGroup.getKarmaPoints()) {
-                String perm = "karma." + currentGroup.getGroupName();
+                String perm = currentGroup.getPermission();
                 if (getPlayer().isOnline() &&
                         !getPlayer().getPlayer().hasPermission(perm) && currentGroup == getTrack().getFirstGroup()) {
                     throw new NullPointerException(getName() + " does not have permissions for the start group! "

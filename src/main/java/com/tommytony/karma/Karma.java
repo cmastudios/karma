@@ -1,7 +1,10 @@
 package com.tommytony.karma;
 
+import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.logging.Logger;
+import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -19,6 +22,7 @@ public class Karma {
     public boolean warEnabled;
     public Logger log;
     public List<KarmaTrack> tracks;
+    public ResourceBundle messages;
 
     public Karma() {
         random = new Random();
@@ -26,11 +30,13 @@ public class Karma {
         tracks = new ArrayList<KarmaTrack>();
     }
 
+    @Deprecated
     public boolean setAmount(List<Player> matches, int amount) {
         Player playerTarget = matches.get(0);
         return this.setAmount(playerTarget, amount);
     }
 
+    @Deprecated
     public boolean setAmount(Player playerTarget, int amount) {
         KarmaPlayer karmaTarget = this.getPlayers().get(playerTarget.getName());
         if (karmaTarget != null && amount != karmaTarget.getKarmaPoints()) {
@@ -83,7 +89,7 @@ public class Karma {
                 for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
                     if (karmaPlayer.getKarmaPoints() < currentGroup.getKarmaPoints()
                             && player.hasPermission(currentGroup.getPermission())) {
-                        this.setAmount(player, currentGroup.getKarmaPoints());
+                        karmaPlayer.setKarmaPoints(currentGroup.getKarmaPoints());
                     }//end if
                 }//end while
 
@@ -496,5 +502,25 @@ public class Karma {
 
     public Database getKarmaDatabase() {
         return db;
+    }
+
+    public String getString(String key) {
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+        return messages.getString(key).replace("''", "'");
+    }
+    public String getString(String key, Object[] args) {
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+        return MessageFormat.format(messages.getString(key), args);
+    }
+
+    public String parseNumber(double dbl) {
+        NumberFormat numberInstance = NumberFormat.getNumberInstance(Locale.getDefault());
+        return numberInstance.format(dbl);
+    }
+    public String parseNumber(long lng) {
+        NumberFormat numberInstance = NumberFormat.getNumberInstance(Locale.getDefault());
+        return numberInstance.format(lng);
     }
 }
