@@ -150,8 +150,11 @@ public class KarmaPlayer {
      * @return true if the player can gift, false otherwise
      */
     public boolean canGift() {
+        if (karma.config.getInt("gift.cooldown", 60) == 0) {
+            return true;
+        }
         long since = System.currentTimeMillis() - getLastGiftTime();
-        return since > 3600 * 1000;
+        return since > (60 * karma.config.getInt("gift.cooldown", 60)) * 1000;
     }
 
     /**

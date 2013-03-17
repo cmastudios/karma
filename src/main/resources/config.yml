@@ -52,7 +52,9 @@ tracks:
             points: 50000
 party:
     time:
+        # unit: minutes
         minimum: 10
+        # unit: minutes
         maximum: 30
     points: 1
     messages:
@@ -72,11 +74,28 @@ demotion:
     message: Bad karma. &a<player>&d demoted to <groupcolor><group>&d.
     demotetofirstgroup: false
 gift:
-    amount: 1
+    amounts:
+        default: 1
+        minimum: 1
+        maximum: 1
+    confirm:
+        enabled: true
+        # unit: seconds
+        timeout: 60
+    offline: false
+    # unit: minutes
+    cooldown: 60
     messages:
         togifter: You gave &a<player> <points>&d karma. How generous!
         toreceiver: '&a<player>&d gave you &a<points>&d karma.'
-        cooldown: You need to wait &a<minutes>&d minutes before gifting again.
+        cooldown: You need to wait &a<minutes>&d minute(s) before gifting again.
+        confirm: |
+            You are about to give &a<points>&d karma to &a<player>&d.
+            &c&nGifting karma is serious business.&r&d You should not gift a player who asks for karma.
+            Type "/karma gift confirm" to send your gift.
+        noconfirm: '&cYou have not attempted to send a gift recently.'
+        outofbounds: '&cThe amount you specified was too low/high.'
+        notenough: '&cYou do not have enough karma to gift.'
 check:
     self:
         message: |
@@ -115,7 +134,7 @@ errors:
     isalreadyintrack: '&cThe player is already in that track'
     unknowncommand: '&cUnknown command. Use &a/karma help&d.'
     commandexception: '&cException <exception> occured while processing your command.'
-    badargs: '&cBad Arguments!.'
+    badargs: '&cBad arguments.'
 war:
     bonus: true
     chance: 0.25
