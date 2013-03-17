@@ -241,7 +241,7 @@ public class KarmaPlayer {
                         .replace("<player>", name)
                         .replace("<group>", newGroup.getGroupName())
                         .replace("<groupcolor>", newGroup.getChatColor().toString()));
-                karma.log.info(name + " promoted to " + newGroup.getGroupName());
+                karma.log.info(name + " promoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
                 break;
             case 1:
                 if (newGroup.isFirstGroup(this.track) && this.track.isFirst()
@@ -261,7 +261,7 @@ public class KarmaPlayer {
                         .replace("<player>", name)
                         .replace("<group>", newGroup.getGroupName())
                         .replace("<groupcolor>", newGroup.getChatColor().toString()));
-                karma.log.info(name + " demoted to " + newGroup.getGroupName());
+                karma.log.info(name + " demoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
                 break;
             default:
                 break;

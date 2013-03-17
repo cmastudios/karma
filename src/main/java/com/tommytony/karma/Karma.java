@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -409,7 +410,12 @@ public class Karma {
 
     public void msg(CommandSender destination, String message) {
         for (String s : this.processMessage(message)) {
-            destination.sendMessage(s);
+            if (destination instanceof ConsoleCommandSender) {
+                // Remove formatting from messages going to console
+                destination.sendMessage(ChatColor.stripColor(s));
+            } else {
+                destination.sendMessage(s);
+            }
         }
     }
 

@@ -52,6 +52,7 @@ public class ChangeTrackCommand implements CommandExecutor, TabCompleter {
             karma.msg(sender, karma.config.getString("errors.nopermission"));
             return true;
         }
+        KarmaTrack oldTrack = chKarmaTrackTarget.getTrack();
         // Will automatically add karma to bump the player's karma up to the first group in the track
         chKarmaTrackTarget.setTrack(targetTrack);
         chKarmaTrackTarget.setGroup(targetTrack.getGroupOnBounds(chKarmaTrackTarget.getKarmaPoints()));
@@ -70,7 +71,8 @@ public class ChangeTrackCommand implements CommandExecutor, TabCompleter {
         for (Player playerOnline : karma.server.getOnlinePlayers()) {
             karma.msg(playerOnline, msg);
         }
-        return false;
+        karma.log.info(chTrackTarget.getName() + "'s track switched to " + targetTrack.getName() + " from " + oldTrack.getName() + " and group switched to " + chKarmaTrackTarget.getGroup().getGroupName());
+        return true;
     }
 
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
