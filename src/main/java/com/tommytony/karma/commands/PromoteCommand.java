@@ -24,24 +24,24 @@ public class PromoteCommand implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
         if(args.length != 2) {
-            karma.msg(sender, karma.config.getString("errors.badargs"));
-            return false;
+            karma.msg(sender, karma.getString("ERROR.ARGS", new Object[] {"/karma promote <player>"}));
+            return true;
         }
 
         OfflinePlayer promoteTarget = karma.getBukkitPlayer(args[1]);
         if (promoteTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
+            karma.msg(sender, karma.getString("ERROR.PLAYER404", new Object[] {args[1]}));
             return true;
         }
         KarmaPlayer karmaPromoteTarget = karma.getPlayer(promoteTarget.getName());
         if (karmaPromoteTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
+            karma.msg(sender, karma.getString("ERROR.PLAYER404.NOKP", new Object[] {promoteTarget.getName()}));
             return true;
         }
         KarmaGroup currentGroup = karmaPromoteTarget.getGroup();
         KarmaGroup nextGroup = karmaPromoteTarget.getTrack().getNextGroup(currentGroup);
         if (nextGroup == null) {
-            karma.msg(sender, karma.config.getString("promocommand.messages.highest"));
+            karma.msg(sender, karma.getString("PROMOTE.HIGHEST", new Object[] {}));
             return true;
         }
         int difference = nextGroup.getKarmaPoints() - karmaPromoteTarget.getKarmaPoints();
@@ -55,12 +55,10 @@ public class PromoteCommand implements CommandExecutor, TabCompleter {
                             + ", but after promotion, the player doesn't have " + nextGroup.getPermission() + "! Promote command configured incorrectly.");
                 }
             }
-            karma.msg(sender, karma.config.getString("promocommand.messages.promoted")
-                    .replace("<player>", promoteTarget.getName())
-                    .replace("<group>", nextGroup.getGroupName()));
+            karma.msg(sender, karma.getString("PROMOTE.SUCCESS", new Object[] {karmaPromoteTarget.getName(), karmaPromoteTarget.getGroup().getFormattedName()}));
             return true;
         } else {
-            karma.msg(sender, karma.config.getString("errors.nopermission"));
+            karma.msg(sender, karma.getString("ERROR.NOPERMISSION", new Object[] {}));
             return true;
         }
     }

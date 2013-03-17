@@ -237,10 +237,7 @@ public class KarmaPlayer {
                                 + ", but after promotion, the player doesn't have " + newGroup.getPermission() + "! Promote command configured incorrectly.");
                     }
                 }
-                karma.msg(this.karma.server.getOnlinePlayers(), this.karma.config.getString("promotion.message")
-                        .replace("<player>", name)
-                        .replace("<group>", newGroup.getGroupName())
-                        .replace("<groupcolor>", newGroup.getChatColor().toString()));
+                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.PROMOTED", new Object[] {name, newGroup.getFormattedName()}));
                 karma.log.info(name + " promoted to " + newGroup.getGroupName());
                 break;
             case 1:
@@ -257,10 +254,7 @@ public class KarmaPlayer {
                                 + ", but after demotion, the player isn't in this group! Demote command configured incorrectly.");
                     }
                 }
-                karma.msg(this.karma.server.getOnlinePlayers(), this.karma.config.getString("demotion.message")
-                        .replace("<player>", name)
-                        .replace("<group>", newGroup.getGroupName())
-                        .replace("<groupcolor>", newGroup.getChatColor().toString()));
+                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.DEMOTED", new Object[] {name, newGroup.getFormattedName()}));
                 karma.log.info(name + " demoted to " + newGroup.getGroupName());
                 break;
             default:

@@ -75,11 +75,9 @@ public class Karma {
                             && !(karmaPlayer.getTrack().getNextGroup(currentGroup) != null && karmaPlayer.getKarmaPoints() >= karmaPlayer.getTrack().getNextGroup(currentGroup).getKarmaPoints())) {
                         // either doesn't have a next rank or can't beat the
                         // next rank's k points, we found the right rank
-                        this.runCommand(config.getString("promotion.command")
-                            .replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
+                        this.runCommand(config.getString("promotion.command").replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
                         for (Player playerOnline : server.getOnlinePlayers()) {
-                            this.msg(playerOnline,
-                                    config.getString("promotion.message").replace("<player>", playerName).replace("<group>", currentGroup.getGroupName()).replace("<groupcolor>", currentGroup.getChatColor().toString()));
+                            this.msg(playerOnline, this.getString("PLAYER.PROMOTED", new Object[] {player.getName(), currentGroup.getFormattedName()}));
                         }//end for
                     }//end if
                 }//end while	
@@ -119,7 +117,7 @@ public class Karma {
             players.put(player.getName(), karmaPlayer);
             db.put(karmaPlayer);
 
-            this.msg(player, config.getString("newplayer.message"));
+            this.msg(player, this.getString("WELCOME"));
             log.finer(player.getName() + " created with " + initialKarma + " karma points");
         }
     }
@@ -437,11 +435,11 @@ public class Karma {
         List<String> ret = new ArrayList<String>();
         if (message.contains("\n")) {
             for (String s : message.split("\n")) {
-                ret.add(parseColor(config.getString("prefix") + s));
+                ret.add(parseColor(this.getString("PREFIX") + s));
             }
             return ret;
         }
-        ret.add(parseColor(config.getString("prefix") + message));
+        ret.add(parseColor(this.getString("PREFIX") + message));
         return ret;
     }
 

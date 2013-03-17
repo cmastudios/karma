@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaPlayer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang.Validate;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -27,70 +27,55 @@ public class GiftCommand implements CommandExecutor, TabCompleter{
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (!sender.hasPermission("karma.gift")) {
-            karma.msg(sender, karma.config.getString("errors.nopermission"));
-            return true;
-        }
-        if (args.length < 2) {
-            karma.msg(sender, karma.config.getString("errors.badargs"));
-            return false;
-        }
+        Validate.isTrue(sender.hasPermission("karma.gift"), karma.getString("ERROR.NOPERMISSION", new Object[] {}));
+        Validate.isTrue(args.length >= 2, karma.getString("ERROR.ARGS", new Object[] {"/karma gift <player> [points]"}));
         KarmaPlayer karmaGiver = null;
+        boolean senderIsPlayer = false;
         if (sender instanceof Player) {
+            senderIsPlayer = true;
             karmaGiver = karma.getPlayer(sender.getName());
         }
-        if ("confirm".equals(args[1]) && karmaGiver != null) {
+        if ("confirm".equals(args[1]) && senderIsPlayer) {
             Gift confirm = this.getConfirmation(karmaGiver);
             if (confirm == null || confirm.expiry < System.currentTimeMillis()) {
-                karma.msg(sender, karma.config.getString("gift.messages.noconfirm", "Can't find confirmation"));
+                karma.msg(sender, karma.getString("GIFT.CONFIRM.404", new Object[] {}));
                 confirms.remove(confirm);
                 return true;
             }
             if (confirm.receiver == null || (!confirm.receiver.getPlayer().isOnline() && !karma.config.getBoolean("gift.offline"))) {
-                karma.msg(sender, karma.config.getString("errors.noplayer"));
+                karma.msg(sender, karma.getString("ERROR.PLAYER404", new Object[] {confirm.receiver == null ? "null" : confirm.receiver.getName()}));
                 confirms.remove(confirm);
                 return true;
             }
             if ((karmaGiver.getKarmaPoints() < confirm.amount
                     || (karmaGiver.getGroup().isFirstGroup(karmaGiver.getTrack())
                         && karmaGiver.getKarmaPoints() - karmaGiver.getGroup().getKarmaPoints() < confirm.amount))) {
-                karma.msg(sender, karma.config.getString("gift.messages.notenough", "Overdrafts forbidden"));
+                karma.msg(sender, karma.getString("GIFT.NOTENOUGH", new Object[] {}));
                 confirms.remove(confirm);
                 return true;
             }
             this.sendGift(confirm);
             confirms.remove(confirm);
             return true;
-        } else if (karmaGiver != null) {
+        } else if (senderIsPlayer) {
             Gift confirm = this.getConfirmation(karmaGiver);
             if (confirm != null) {
                 GiftCommand.confirms.remove(confirm);
             }
         }
         OfflinePlayer giftTarget = karma.getBukkitPlayer(args[1]);
-        if (giftTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
-        if (!giftTarget.isOnline() && !karma.config.getBoolean("gift.offline", false)) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
+        Validate.notNull(giftTarget, karma.getString("ERROR.PLAYER404", new Object[] {args[1]}));
+        Validate.isTrue(giftTarget.hasPlayedBefore(), karma.getString("ERROR.PLAYER404", new Object[] {args[1]}));
+        Validate.isTrue(giftTarget.isOnline() || karma.config.getBoolean("gift.offline", false) == true, karma.getString("ERROR.PLAYER404.OFFLINE", new Object[] {giftTarget.getName()}));
         KarmaPlayer receipient = karma.getPlayer(giftTarget.getName());
-        if (receipient == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
-        if (karmaGiver == receipient) {
-            karma.msg(sender, karma.config.getString("gift.messages.nogiftself"));
-            return true;
-        }
+        Validate.notNull(receipient, karma.getString("ERROR.PLAYER404.NOKP", new Object[] {giftTarget.getName()}));
+        Validate.isTrue(receipient != karmaGiver, karma.getString("GIFT.NOGIFTSELF", new Object[] {}));
         int amount = karma.config.getInt("gift.amounts.default", karma.config.getInt("gift.amount", 1));
         if (args.length > 2) {
             int attemptedAmount = Integer.parseInt(args[2]);
             if (attemptedAmount < karma.config.getInt("gift.amounts.minimum", 1)
                     || attemptedAmount > karma.config.getInt("gift.amounts.maximum", 1)) {
-                karma.msg(sender, karma.config.getString("gift.messages.outofbounds", "Too little/too much karma"));
+                karma.msg(sender, karma.getString("GIFT.OUTOFBOUNDS", new Object[] {}));
                 return true;
             }
             amount = attemptedAmount;
@@ -107,13 +92,13 @@ public class GiftCommand implements CommandExecutor, TabCompleter{
         if (karmaGiver != null && (karmaGiver.getKarmaPoints() < amount
                 || (karmaGiver.getGroup().isFirstGroup(karmaGiver.getTrack())
                     && karmaGiver.getKarmaPoints() - karmaGiver.getGroup().getKarmaPoints() < amount))) {
-            karma.msg(sender, karma.config.getString("gift.messages.notenough", "Overdrafts forbidden"));
+            karma.msg(sender, karma.getString("GIFT.NOTENOUGH", new Object[] {}));
             return true;
         }
         if (karmaGiver != null && !karmaGiver.canGift()) {
             long since = (System.currentTimeMillis() - karmaGiver.getLastGiftTime()) / 1000;
             long minutes = ((60 * karma.config.getInt("gift.cooldown", 60)) - since) / 60 + 1;
-            karma.msg(sender, karma.config.getString("gift.messages.cooldown").replace("<minutes>", Long.toString(minutes)));
+            karma.msg(sender, karma.getString("GIFT.COOLDOWN", new Object[] {karma.parseNumber(minutes)}));
             return true;
         }
         long expiry = System.currentTimeMillis() + (karma.config.getInt("gift.confirm.timeout", 60) * 1000);
@@ -122,9 +107,7 @@ public class GiftCommand implements CommandExecutor, TabCompleter{
             this.sendGift(gift);
         } else {
             GiftCommand.confirms.add(gift);
-            karma.msg(sender, karma.config.getString("gift.messages.confirm", "/k gift confirm")
-                    .replace("<player>", gift.receiver.getName())
-                    .replace("<points>", Integer.toString(gift.amount)));
+            karma.msg(sender, karma.getString("GIFT.CONFIRM.ASK", new Object[] {karma.parseNumber(amount), receipient.getName()}));
         }
         return true;
     }
@@ -134,17 +117,12 @@ public class GiftCommand implements CommandExecutor, TabCompleter{
             gift.gifter.updateLastGiftTime();
             gift.gifter.removeKarma(gift.amount);
             if (gift.gifter.getPlayer().isOnline()) {
-                karma.msg(gift.gifter.getPlayer().getPlayer(), karma.config.getString("gift.messages.togifter")
-                        .replace("<player>", gift.receiver.getName())
-                        .replace("<points>", Integer.toString(gift.amount)));
+                karma.msg(gift.gifter.getPlayer().getPlayer(), karma.getString("GIFT.THANKS", new Object[] {gift.receiver.getName(), karma.parseNumber(gift.amount)}));
             }
-            karma.log.info(gift.gifter.getName() + " gave " + gift.amount + " karma points to " + gift.receiver.getName() + ".");
+            karma.log.info(gift.gifter.getName() + " gave " + karma.parseNumber(gift.amount) + " karma points to " + gift.receiver.getName() + ".");
         }
         if (gift.receiver.getPlayer().isOnline()) {
-            karma.msg(gift.receiver.getPlayer().getPlayer(),
-                    karma.config.getString("gift.messages.toreceiver")
-                    .replace("<player>", gift.gifter != null ? gift.gifter.getName() : "Server")
-                    .replace("<points>", Integer.toString(gift.amount)));
+            karma.msg(gift.receiver.getPlayer().getPlayer(), karma.getString("GIFT.RECEIPIENT", new Object[] {gift.gifter != null ? gift.gifter.getName() : "Server", karma.parseNumber(gift.amount)}));
         }
     }
     private Gift getConfirmation(KarmaPlayer gifter) {

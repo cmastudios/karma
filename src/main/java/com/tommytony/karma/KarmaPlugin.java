@@ -183,15 +183,25 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
                     return new CheckKarmaCommand(karma).onCommand(sender, cmd, alias, args);
                 }
 
-                karma.msg(sender, karma.config.getString("errors.unknowncommand"));
+                karma.msg(sender, karma.getString("ERROR.COMMAND404", new Object[] {}));
                 return true;
 
             }
 
         } catch (Exception e) {
-            karma.msg(sender, karma.config.getString("errors.commandexception").replace("<exception>", e.toString()));
-            e.printStackTrace();
-            karma.log.warning("Error encountered.");
+            String errorString = e.getMessage();
+            if (errorString.isEmpty()) {
+                errorString = e.toString();
+            }
+            String usagePrefix = karma.getString("ERROR.ARGS").replace("{0}", "");
+            if (errorString.startsWith(usagePrefix)) {
+                karma.msg(sender, errorString);
+            } else {
+                karma.msg(sender, karma.getString("ERROR.EXCEPTION", new Object[] {errorString}));
+            }
+            if (!(e instanceof IllegalArgumentException)) {
+                e.printStackTrace();
+            }
         }
 
         return true;
