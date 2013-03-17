@@ -5,6 +5,7 @@ import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaPlayer;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.Validate;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,38 +23,19 @@ public class SetKarmaCommand implements CommandExecutor, TabCompleter {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (!sender.hasPermission("karma.set")) {
-            karma.msg(sender, karma.config.getString("errors.nopermission"));
-            return true;
-        }
-        if(args.length != 3) {
-            karma.msg(sender, karma.config.getString("errors.badargs"));
-            return false;
-        }
-        OfflinePlayer setKarmaTarget = karma.getBukkitPlayer(args[1]);
-        if (setKarmaTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
-        KarmaPlayer setKarmaPlayer = karma.getPlayer(setKarmaTarget.getName());
-        if (setKarmaPlayer == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-        }
-        int karmaToSet;
-        try {
-            karmaToSet = Integer.parseInt(args[2]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The amount of points to set must be an integer.");
-        }
-        if (karmaToSet < 0) {
-            throw new IllegalArgumentException("The amount of karma points to set must be greather than zero.");
-        }
-        if (karmaToSet == setKarmaPlayer.getKarmaPoints()) {
-            throw new IllegalArgumentException("The amount of karma points to set must be different than the player's current karma points.");
-        }
-        karma.msg(sender, "Karma of " + setKarmaPlayer.getName() + " set to " + karmaToSet + ".");
-        karma.log.info(setKarmaPlayer.getName() + "'s karma points set to " + karmaToSet + " from " + setKarmaPlayer.getKarmaPoints() + ".");
-        setKarmaPlayer.setKarmaPoints(karmaToSet);
+        Validate.isTrue(sender.hasPermission("karma.set"), karma.getString("ERROR.NOPERMISSION", new Object[] {}));
+        Validate.isTrue(args.length == 3, karma.getString("ERROR.ARGS", new Object[] {"/karma set <player> <amount>"}));
+        OfflinePlayer playerTarget = karma.getBukkitPlayer(args[1]);
+        Validate.notNull(playerTarget, karma.getString("ERROR.PLAYER404", new Object[] {args[1]}));
+        Validate.isTrue(playerTarget.hasPlayedBefore(), karma.getString("ERROR.PLAYER404", new Object[] {args[1]}));
+        KarmaPlayer target = karma.getPlayer(playerTarget.getName());
+        Validate.notNull(target, karma.getString("ERROR.PLAYER404.NOKP", new Object[] {playerTarget.getName()}));
+        int karmaToSet = Integer.parseInt(args[2]);
+        Validate.isTrue(karmaToSet >= 0, karma.getString("SET.POSITIVE", new Object[] {}));
+        Validate.isTrue(karmaToSet != target.getKarmaPoints(), karma.getString("SET.NOCHANGE", new Object[] {}));
+        karma.msg(sender, karma.getString("SET.SUCCESS", new Object[] {target.getName(), karmaToSet}));
+        karma.log.info(target.getName() + "'s karma points set to " + karmaToSet + " from " + target.getKarmaPoints() + ".");
+        target.setKarmaPoints(karmaToSet);
         return true;
     }
 

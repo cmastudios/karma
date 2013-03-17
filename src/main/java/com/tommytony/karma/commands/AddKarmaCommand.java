@@ -5,6 +5,7 @@ import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaPlayer;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -23,33 +24,17 @@ public class AddKarmaCommand implements CommandExecutor, TabCompleter {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (!sender.hasPermission("karma.set")) {
-            karma.msg(sender, karma.config.getString("errors.nopermission"));
-            return true;
-        }
-        if(args.length != 3) {
-            karma.msg(sender, karma.config.getString("errors.badargs"));
-            return false;
-        }
-        OfflinePlayer addKarmaTarget = karma.getBukkitPlayer(args[1]);
-        if (addKarmaTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
-        KarmaPlayer addKarmaPlayer = karma.getPlayer(addKarmaTarget.getName());
-        if (addKarmaPlayer == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
-        int karmaToAdd;
-        try {
-            karmaToAdd = Integer.parseInt(args[2]);
-        } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED + "The third argument must be an integer!");
-            return true;
-        }
-        karma.msg(sender, "Karma of " + addKarmaPlayer.getName() + " changed");
-        addKarmaPlayer.addKarma(karmaToAdd);
+        Validate.isTrue(sender.hasPermission("karma.set"), karma.getString("ERROR.NOPERMISSION", new Object[] {}));
+        Validate.isTrue(args.length == 3, karma.getString("ERROR.ARGS", new Object[] {"/karma set <player> <amount>"}));
+        OfflinePlayer playerTarget = karma.getBukkitPlayer(args[1]);
+        Validate.notNull(playerTarget, karma.getString("ERROR.PLAYER404", new Object[] {args[1]}));
+        Validate.isTrue(playerTarget.hasPlayedBefore(), karma.getString("ERROR.PLAYER404", new Object[] {args[1]}));
+        KarmaPlayer target = karma.getPlayer(playerTarget.getName());
+        Validate.notNull(target, karma.getString("ERROR.PLAYER404.NOKP", new Object[] {playerTarget.getName()}));
+        int amount = Integer.parseInt(args[2]);
+        Validate.isTrue(amount > 0, karma.getString("ADD.POSITIVE", new Object[] {}));
+        karma.msg(sender, karma.getString("ADD.SUCCESS", new Object[] {target.getName(), amount}));
+        target.addKarma(amount);
         return true;
     }
 

@@ -39,27 +39,27 @@ public class KarmaParty implements Runnable {
             int earnedKarmaPoints = earnings.get(karmaPlayer);
             if (!karmaPlayer.isAfk()) {
                 if (player != null && !karma.config.getBoolean("party.silent", false)) {
-                    karma.msg(player, karma.config.getString("party.messages.announce"));
+                    karma.msg(player, karma.getString("PARTY.ANNOUNCE", new Object[] {}));
                     if (karma.warEnabled) {
                         if (karmaPlayer.isPlayingWar()) {
-                            karma.msg(karmaPlayer.getPlayer().getPlayer(), karma.config.getString("war.messages.player"));
+                            karma.msg(karmaPlayer.getPlayer().getPlayer(), karma.getString("WARBONUS.PLAYER", new Object[] {}));
                         }
                         if (karmaPlayer.hasActiveWarzone()) {
-                            karma.msg(karmaPlayer.getPlayer().getPlayer(), karma.config.getString("war.messages.creator"));
+                            karma.msg(karmaPlayer.getPlayer().getPlayer(), karma.getString("WARBONUS.ZM", new Object[] {}));
                         }
                     }
-                    karma.msg(player, karma.config.getString("party.messages.pointgain").replace("<points>", Integer.toString(earnedKarmaPoints)));
+                    karma.msg(player, karma.getString("PARTY.POINTGAIN", new Object[] {karma.parseNumber(earnedKarmaPoints)}));
                 }
                 karmaPlayer.addKarma(earnedKarmaPoints);
                 totalDistributedKarma += earnedKarmaPoints;
                 playerList.append(player.getName()).append(", ");
             } else if (player != null && !karma.config.getBoolean("party.silent", false)) {
-                karma.msg(player, karma.config.getString("party.messages.announce"));
-                karma.msg(player, karma.config.getString("party.messages.afknogain").replace("<points>", karma.config.getString("party.points")));
+                karma.msg(player, karma.getString("PARTY.ANNOUNCE", new Object[] {}));
+                karma.msg(player, karma.getString("PARTY.AFKNOGAIN", new Object[] {karma.parseNumber(karma.config.getInt("party.points"))}));
             }
         }
         if (playerList.toString().length() > 0) {
-            karma.log.fine(playerList.toString() + " gained a total of " + totalDistributedKarma + " karma points.");
+            karma.log.fine(playerList.toString() + " gained a total of " + karma.parseNumber(totalDistributedKarma) + " karma points.");
         }
 
         // save

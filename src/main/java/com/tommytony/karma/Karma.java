@@ -1,7 +1,10 @@
 package com.tommytony.karma;
 
+import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.logging.Logger;
+import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -20,6 +23,7 @@ public class Karma {
     public boolean warEnabled;
     public Logger log;
     public List<KarmaTrack> tracks;
+    public ResourceBundle messages;
 
     public Karma() {
         random = new Random();
@@ -27,11 +31,13 @@ public class Karma {
         tracks = new ArrayList<KarmaTrack>();
     }
 
+    @Deprecated
     public boolean setAmount(List<Player> matches, int amount) {
         Player playerTarget = matches.get(0);
         return this.setAmount(playerTarget, amount);
     }
 
+    @Deprecated
     public boolean setAmount(Player playerTarget, int amount) {
         KarmaPlayer karmaTarget = this.getPlayers().get(playerTarget.getName());
         if (karmaTarget != null && amount != karmaTarget.getKarmaPoints()) {
@@ -70,11 +76,9 @@ public class Karma {
                             && !(karmaPlayer.getTrack().getNextGroup(currentGroup) != null && karmaPlayer.getKarmaPoints() >= karmaPlayer.getTrack().getNextGroup(currentGroup).getKarmaPoints())) {
                         // either doesn't have a next rank or can't beat the
                         // next rank's k points, we found the right rank
-                        this.runCommand(config.getString("promotion.command")
-                            .replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
+                        this.runCommand(config.getString("promotion.command").replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
                         for (Player playerOnline : server.getOnlinePlayers()) {
-                            this.msg(playerOnline,
-                                    config.getString("promotion.message").replace("<player>", playerName).replace("<group>", currentGroup.getGroupName()).replace("<groupcolor>", currentGroup.getChatColor().toString()));
+                            this.msg(playerOnline, this.getString("PLAYER.PROMOTED", new Object[] {player.getName(), currentGroup.getFormattedName()}));
                         }//end for
                     }//end if
                 }//end while	
@@ -84,7 +88,7 @@ public class Karma {
                 for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
                     if (karmaPlayer.getKarmaPoints() < currentGroup.getKarmaPoints()
                             && player.hasPermission(currentGroup.getPermission())) {
-                        this.setAmount(player, currentGroup.getKarmaPoints());
+                        karmaPlayer.setKarmaPoints(currentGroup.getKarmaPoints());
                     }//end if
                 }//end while
 
@@ -114,7 +118,7 @@ public class Karma {
             players.put(player.getName(), karmaPlayer);
             db.put(karmaPlayer);
 
-            this.msg(player, config.getString("newplayer.message"));
+            this.msg(player, this.getString("WELCOME"));
             log.finer(player.getName() + " created with " + initialKarma + " karma points");
         }
     }
@@ -437,11 +441,11 @@ public class Karma {
         List<String> ret = new ArrayList<String>();
         if (message.contains("\n")) {
             for (String s : message.split("\n")) {
-                ret.add(parseColor(config.getString("prefix") + s));
+                ret.add(parseColor(this.getString("PREFIX") + s));
             }
             return ret;
         }
-        ret.add(parseColor(config.getString("prefix") + message));
+        ret.add(parseColor(this.getString("PREFIX") + message));
         return ret;
     }
 
@@ -502,5 +506,25 @@ public class Karma {
 
     public Database getKarmaDatabase() {
         return db;
+    }
+
+    public String getString(String key) {
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+        return messages.getString(key).replace("''", "'");
+    }
+    public String getString(String key, Object[] args) {
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+        return MessageFormat.format(messages.getString(key), args);
+    }
+
+    public String parseNumber(double dbl) {
+        NumberFormat numberInstance = NumberFormat.getNumberInstance(Locale.getDefault());
+        return numberInstance.format(dbl);
+    }
+    public String parseNumber(long lng) {
+        NumberFormat numberInstance = NumberFormat.getNumberInstance(Locale.getDefault());
+        return numberInstance.format(lng);
     }
 }

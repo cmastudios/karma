@@ -3,6 +3,8 @@ package com.tommytony.karma;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListResourceBundle;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import static junit.framework.Assert.*;
 import org.bukkit.ChatColor;
@@ -39,6 +41,11 @@ public class ImportTest {
     public void setup() {
         karma = new Karma();
         config = mock(FileConfiguration.class);
+        db = mock(Database.class);
+        p = mock(Player.class);
+        event = PowerMockito.mock(PlayerJoinEvent.class);
+        when(p.getName()).thenReturn("cmastudios");
+        when(event.getPlayer()).thenReturn(p);
         groups = Arrays.asList(
                 new KarmaGroup("recruit", 0, ChatColor.WHITE),
                 new KarmaGroup("builder", 10, ChatColor.BLACK),
@@ -47,14 +54,10 @@ public class ImportTest {
         def.setFirst(true);
         def.setGroups(groups);
         karma.tracks = Arrays.asList(def);
-        db = mock(Database.class);
         karma.db = db;
-        p = mock(Player.class);
-        when(p.getName()).thenReturn("cmastudios");
-        event = PowerMockito.mock(PlayerJoinEvent.class);
-        when(event.getPlayer()).thenReturn(p);
         karma.players = new HashMap<String, KarmaPlayer>();
         karma.log = mock(Logger.class);
+        karma.messages = new DummyResourceBundle();
     }
 
     @Test
@@ -63,7 +66,6 @@ public class ImportTest {
         when(p.hasPermission("karma.recruit")).thenReturn(true);
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(config.getBoolean("import.bonus")).thenReturn(false);
-        when(config.getString("newplayer.message")).thenReturn("newplayer.message");
         karma.config = config;
         KarmaPlayerListener listener = new KarmaPlayerListener(karma);
         listener.onPlayerJoin(event);
@@ -77,7 +79,6 @@ public class ImportTest {
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(config.getBoolean("import.bonus")).thenReturn(true);
         when(config.getDouble("import.percent")).thenReturn(0.25);
-        when(config.getString("newplayer.message")).thenReturn("newplayer.message");
         karma.config = config;
         KarmaPlayerListener listener = new KarmaPlayerListener(karma);
         listener.onPlayerJoin(event);
@@ -156,4 +157,15 @@ public class ImportTest {
         verify(kp).removeKarmaAutomatic(5);
         verify(bukkitServ, never()).dispatchCommand(any(CommandSender.class), anyString());
     }
+    class DummyResourceBundle extends ListResourceBundle {
+
+        private Object[][] contents = new Object[][]{
+            {"WELCOME", "welcome message"},
+            {"PREFIX", "karma: "}
+        };
+
+        protected Object[][] getContents() {
+            return contents;
+        }
+    };
 }

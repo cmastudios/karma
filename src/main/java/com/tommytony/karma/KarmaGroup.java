@@ -106,4 +106,12 @@ public class KarmaGroup implements Comparable {
         }
         return 0;
     }
+
+    /**
+     * Get the group's name with color formatting applied.
+     * @return the formatted name
+     */
+    public String getFormattedName() {
+        return this.getChatColor() + this.getGroupName();
+    }
 }
