@@ -1,9 +1,6 @@
 package com.tommytony.karma;
 
 import com.tommytony.karma.event.KarmaPartyEvent;
-import com.tommytony.war.Team;
-import com.tommytony.war.War;
-import com.tommytony.war.Warzone;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.entity.Player;
@@ -41,7 +38,7 @@ public class KarmaParty implements Runnable {
             Player player = karmaPlayer.getPlayer().getPlayer();
             int earnedKarmaPoints = earnings.get(karmaPlayer);
             if (!karmaPlayer.isAfk()) {
-                if (player != null) {
+                if (player != null && !karma.config.getBoolean("party.silent", false)) {
                     karma.msg(player, karma.config.getString("party.messages.announce"));
                     if (karma.warEnabled) {
                         if (karmaPlayer.isPlayingWar()) {
@@ -56,7 +53,7 @@ public class KarmaParty implements Runnable {
                 karmaPlayer.addKarma(earnedKarmaPoints);
                 totalDistributedKarma += earnedKarmaPoints;
                 playerList.append(player.getName()).append(", ");
-            } else if (player != null) {
+            } else if (player != null && !karma.config.getBoolean("party.silent", false)) {
                 karma.msg(player, karma.config.getString("party.messages.announce"));
                 karma.msg(player, karma.config.getString("party.messages.afknogain").replace("<points>", karma.config.getString("party.points")));
             }

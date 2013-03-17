@@ -57,6 +57,7 @@ party:
         # unit: minutes
         maximum: 30
     points: 1
+    silent: false
     messages:
         announce: It's a &a/karma&d party!
         pointgain: You gain &a<points>&d karma point(s).
@@ -155,6 +156,8 @@ mysql:
     password: 12345
     database: karma
 afk:
+    # unit: minutes
+    time: 10
     triggers:
         chat: true
         command: true

@@ -300,7 +300,7 @@ public class KarmaPlayer {
     public boolean isAfk() {
         long activeInterval = System.currentTimeMillis() - this.getLastActivityTime();
         int minutesAfk = (int) Math.floor(activeInterval / (1000 * 60));
-        return minutesAfk >= 10;
+        return minutesAfk >= karma.config.getInt("afk.time", 10);
     }
     /**
      * Check if a player is playing in a warzone.
