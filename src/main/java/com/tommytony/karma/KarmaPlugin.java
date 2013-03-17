@@ -61,10 +61,11 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
         manager.registerEvents(worldListener, this);
 
         KarmaPlayerListener playerListener = new KarmaPlayerListener(karma);
-        playerListener.pingOnPlayerChat = karma.config.getBoolean("afk.triggers.chat");
-        playerListener.pingOnPlayerCommand = karma.config.getBoolean("afk.triggers.command");
-        playerListener.pingOnPlayerBuild = karma.config.getBoolean("afk.triggers.build");
-        playerListener.pingOnPlayerMove = karma.config.getBoolean("afk.triggers.move");
+        playerListener.pingOnPlayerChat = karma.config.getBoolean("afk.triggers.chat", true);
+        playerListener.pingOnPlayerCommand = karma.config.getBoolean("afk.triggers.command", true);
+        playerListener.pingOnPlayerBuild = karma.config.getBoolean("afk.triggers.build", true);
+        playerListener.pingOnPlayerMove = karma.config.getBoolean("afk.triggers.move", false);
+        playerListener.pingOnPlayerDamage = karma.config.getBoolean("afk.triggers.damage", true);
         manager.registerEvents(playerListener, this);
 
         // Load online players
@@ -73,12 +74,12 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
         // Check for war and enable bonuses if enabled in config
         try {
             Class.forName("com.tommytony.war.War");
-            if (karma.config.getBoolean("war.bonus")) {
+            if (karma.config.getBoolean("war.bonus", false)) {
                 karma.warEnabled = true;
             }
         } catch (ClassNotFoundException e) {
             karma.warEnabled = false;
-            if (karma.config.getBoolean("war.bonus")) {
+            if (karma.config.getBoolean("war.bonus", false)) {
                 karma.log.warning("war.bonus enabled in configuration but the War plugin was not found! Bonuses have been disabled.");
             }
         }

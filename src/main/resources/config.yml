@@ -141,4 +141,4 @@ afk:
         build: true
 # Enabling move can drastically decrease server performance
         move: false
-        
+        damage: true
