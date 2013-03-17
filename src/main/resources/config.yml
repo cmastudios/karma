@@ -96,6 +96,7 @@ gift:
         noconfirm: '&cYou have not attempted to send a gift recently.'
         outofbounds: '&cThe amount you specified was too low/high.'
         notenough: '&cYou do not have enough karma to gift.'
+        nogiftself: '&cYou cannot gift karma to yourself.'
 check:
     self:
         message: |
@@ -118,7 +119,7 @@ viewranks:
 help: |
     Use &a/karma&d to check your karma points.
     Use &a/karma <person>&d to see points of others.
-    Use &a/karma gift <person>&d to give karma to another player.
+    Use &a/karma gift <person> [amount]&d to give karma to another player.
     Use &a/karma ranks&d to view earnable ranks.
     Use &a/k&d as an alias
 admin-help: |

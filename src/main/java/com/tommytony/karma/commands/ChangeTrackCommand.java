@@ -1,16 +1,21 @@
 package com.tommytony.karma.commands;
 
+import com.google.common.collect.ImmutableList;
 import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaGroup;
 import com.tommytony.karma.KarmaPlayer;
 import com.tommytony.karma.KarmaTrack;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
-public class ChangeTrackCommand implements CommandExecutor {
+public class ChangeTrackCommand implements CommandExecutor, TabCompleter {
 
     private Karma karma;
 
@@ -66,5 +71,23 @@ public class ChangeTrackCommand implements CommandExecutor {
             karma.msg(playerOnline, msg);
         }
         return false;
+    }
+
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (args.length == 2) {
+            List<String> players = new ArrayList();
+            for (Player player : karma.server.getOnlinePlayers()) {
+                players.add(player.getName());
+            }
+            return StringUtil.copyPartialMatches(args[1], players, new ArrayList<String>(players.size()));
+        }
+        if (args.length == 3) {
+            List<String> tracks = new ArrayList();
+            for (KarmaTrack track : karma.tracks) {
+                tracks.add(track.getName());
+            }
+            return StringUtil.copyPartialMatches(args[2], tracks, new ArrayList<String>(tracks.size()));
+        }
+        return ImmutableList.of();
     }
 }

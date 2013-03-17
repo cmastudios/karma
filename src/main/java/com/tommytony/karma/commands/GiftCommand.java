@@ -1,16 +1,20 @@
 package com.tommytony.karma.commands;
 
+import com.google.common.collect.ImmutableList;
 import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaPlayer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
-public class GiftCommand implements CommandExecutor {
+public class GiftCommand implements CommandExecutor, TabCompleter{
 
     private Karma karma;
     private static List<Gift> confirms;
@@ -75,6 +79,10 @@ public class GiftCommand implements CommandExecutor {
         KarmaPlayer receipient = karma.getPlayer(giftTarget.getName());
         if (receipient == null) {
             karma.msg(sender, karma.config.getString("errors.noplayer"));
+            return true;
+        }
+        if (karmaGiver == receipient) {
+            karma.msg(sender, karma.config.getString("gift.messages.nogiftself"));
             return true;
         }
         int amount = karma.config.getInt("gift.amounts.default", karma.config.getInt("gift.amount", 1));
@@ -146,6 +154,26 @@ public class GiftCommand implements CommandExecutor {
             }
         }
         return null;
+    }
+
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+        KarmaPlayer karmaGiver = null;
+        if (sender instanceof Player) {
+            karmaGiver = karma.getPlayer(sender.getName());
+        }
+        if (args.length == 2 && karmaGiver != null && this.getConfirmation(karmaGiver) != null) {
+            return ImmutableList.of("confirm");
+        } else if (args.length == 2) {
+            List<String> players = new ArrayList();
+            for (Player player : karma.server.getOnlinePlayers()) {
+                players.add(player.getName());
+            }
+            return StringUtil.copyPartialMatches(args[1], players, new ArrayList<String>(players.size()));
+        }
+        if (args.length == 3) {
+            return ImmutableList.of(Integer.toString(karma.config.getInt("gift.amounts.default", karma.config.getInt("gift.amount", 1))));
+        }
+        return ImmutableList.of();
     }
     private class Gift {
         public KarmaPlayer gifter;

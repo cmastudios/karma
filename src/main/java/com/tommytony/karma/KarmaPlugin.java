@@ -1,9 +1,11 @@
 package com.tommytony.karma;
 
+import com.google.common.collect.ImmutableList;
 import com.tommytony.karma.commands.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.StringUtil;
 
 public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
 
@@ -88,7 +91,7 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
         this.getServer().getScheduler().runTaskLater(this, new KarmaParty(karma),
                 karma.getNextRandomKarmaPartyDelay());
     }
-    
+    private final List<String> commands = ImmutableList.of("ranks", "help", "gift", "promote", "set", "add", "track");
     //called when a command is recieved by the server
     @Override
     public boolean onCommand(CommandSender sender, Command cmd,
@@ -138,6 +141,29 @@ public class KarmaPlugin extends JavaPlugin implements KarmaAPI {
         }
 
         return true;
+    }
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (args.length == 1) {
+            return StringUtil.copyPartialMatches(args[0], commands, new ArrayList<String>(commands.size()));
+        } else if (args.length > 1) {
+            if (args[0].equalsIgnoreCase("gift")) {
+                return new GiftCommand(karma).onTabComplete(sender, cmd, alias, args);
+            }
+            if (args[0].equalsIgnoreCase("promote") || args[1].equalsIgnoreCase("promo")) {
+                return new PromoteCommand(karma).onTabComplete(sender, cmd, alias, args);
+            }
+            if (args[0].equalsIgnoreCase("set")) {
+                return new SetKarmaCommand(karma).onTabComplete(sender, cmd, alias, args);
+            }
+            if (args[0].equalsIgnoreCase("add")) {
+                return new AddKarmaCommand(karma).onTabComplete(sender, cmd, alias, args);
+            }
+            if (args[0].equalsIgnoreCase("track")) {
+                return new ChangeTrackCommand(karma).onTabComplete(sender, cmd, alias, args);
+            }
+        }
+        return ImmutableList.of();
     }
 
     public Map<String, KarmaPlayer> getPlayers() {
