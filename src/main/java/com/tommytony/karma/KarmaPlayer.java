@@ -71,7 +71,16 @@ public class KarmaPlayer {
             if (this.karmaPoints < this.track.getFirstGroup().getKarmaPoints()) {
                 this.karmaPoints = this.track.getFirstGroup().getKarmaPoints();
             }
-//            this.karma.checkForDemotion(this, before, this.karmaPoints, automatic);
+            if (!karma.config.getBoolean("demotion.demotetofirstgroup", true) && automatic) {
+                KarmaGroup secondGroup = this.track.getNextGroup(track.getFirstGroup());
+                // Player was previously in the second group and is no longer in this group
+                if (secondGroup != null && before >= secondGroup.getKarmaPoints()
+                        && this.karmaPoints < secondGroup.getKarmaPoints()
+                        && track.isFirst()) { // First track only
+                    // Prevent losing enough karma to cause a demotion into the first group.
+                    this.karmaPoints = secondGroup.getKarmaPoints();
+                }
+            }
             this.updatePermissions(before, this.karmaPoints);
             this.karma.getKarmaDatabase().put(this);
         }
@@ -241,10 +250,6 @@ public class KarmaPlayer {
                 karma.log.info(name + " promoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
                 break;
             case 1:
-                if (newGroup.isFirstGroup(this.track) && this.track.isFirst()
-                        && !karma.config.getBoolean("demotion.demotetofirstgroup")) {
-                    break; // Prevents players from being demoted to the first group automatically
-                }
                 karma.runCommand(karma.config.getString("demotion.command")
                         .replace("<player>", name)
                         .replace("<group>", newGroup.getGroupName()));
