@@ -81,7 +81,7 @@ public class Karma {
                             this.msg(playerOnline, this.getString("PLAYER.PROMOTED", new Object[] {player.getName(), currentGroup.getFormattedName()}));
                         }//end for
                     }//end if
-                }//end while	
+                }//end while
                 // Check if a player has enough karma points for his rank, if not, add them
                 // This prevents problems when server admins use their permission manager's commands for promotions instead of karma's
                 // TODO: add configuration option to disable this for setups with one mysql db for karma but multiple servers
@@ -193,6 +193,7 @@ public class Karma {
         return groupList.get((groupList.size()-1)).getTrack(tracks);
     }
 
+    //<editor-fold defaultstate="collapsed" desc="deprecated code">
     @Deprecated
     public void checkForPromotion(KarmaPlayer player, int before, int after) {
         if (!player.getPlayer().isOnline()) {
@@ -207,7 +208,7 @@ public class Karma {
             if (before < group.getKarmaPoints()
                     && after >= group.getKarmaPoints()
                     && !playerForPromotion.hasPermission(perm)) {
-                
+
                 this.runCommand(config.getString("promotion.command")
                         .replace("<player>", player.getName())
                         .replace("<group>", group.getGroupName()));
@@ -245,7 +246,7 @@ public class Karma {
                     && after < group.getKarmaPoints()
                     && after >= previousGroup.getKarmaPoints()) {
 
-                if (previousGroup.isFirstGroup(player.getTrack()) && player.getTrack().isFirst() 
+                if (previousGroup.isFirstGroup(player.getTrack()) && player.getTrack().isFirst()
                         && !config.getBoolean("demotion.demotetofirstgroup") && automatic) {
                     return; // Prevents players from being demoted to the first group automatically
                 }
@@ -357,7 +358,7 @@ public class Karma {
         }
         return null;
     }
-
+    //</editor-fold>
     public int getNextRandomKarmaPartyDelay() {
         // on average 20, between 10 min and 30 min
         int minutes = config.getInt("party.time.minimum")
@@ -386,8 +387,8 @@ public class Karma {
                 track.setFirst(true);
                 continue;
             }
-            ret.add(new KarmaGroup(group, 
-                    config.getInt("tracks." + track.getName() + "." + group + ".points"), 
+            ret.add(new KarmaGroup(group,
+                    config.getInt("tracks." + track.getName() + "." + group + ".points"),
                     ChatColor.getByChar(
                     config.getString("tracks." + track.getName() + "." + group + ".color"))));
         }
