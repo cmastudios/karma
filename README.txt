@@ -1,1 +1,0 @@
-<http://cmastudios.me/wiki/Karma>
