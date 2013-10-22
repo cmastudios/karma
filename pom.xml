@@ -2,28 +2,38 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tommytony</groupId>
     <artifactId>karma</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>1.0</version>
     <name>Karma</name>
-    <url>http://cmastudios.me/wiki/Karma</url>
+    <url>http://dev.bukkit.org/bukkit-plugins/karma-ranking/</url>
+    <description>Automatic ranking of players based on a point system</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    <distributionManagement>
+        <repository>
+            <id>cma-repo-int</id>
+            <url>http://maven.cmastudios.me/archiva/repository/internal/</url>
+        </repository>
+        <snapshotRepository>
+            <id>cma-repo-snap</id>
+            <url>http://maven.cmastudios.me/archiva/repository/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
         <repository>
-            <id>cmastudios-repo</id>
-            <url>http://cmastudios.me/repo/maven/</url>
+            <id>cma-repo</id>
+            <url>http://maven.cmastudios.me/archiva/repository/internal/</url>
         </repository>
     </repositories>
     <dependencies>
         <dependency>
             <groupId>com.tommytony</groupId>
             <artifactId>war</artifactId>
-            <version>0.1</version>
+            <version>1.7.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
