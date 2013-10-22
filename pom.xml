@@ -1,30 +1,39 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tommytony</groupId>
     <artifactId>karma</artifactId>
-    <version>0.3</version>
+    <version>1.0</version>
     <name>Karma</name>
-    <url>http://cmastudios.me/wiki/Karma</url>
+    <url>http://dev.bukkit.org/bukkit-plugins/karma-ranking/</url>
+    <description>Automatic ranking of players based on a point system</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    <distributionManagement>
+        <repository>
+            <id>cma-repo-int</id>
+            <url>http://maven.cmastudios.me/archiva/repository/internal/</url>
+        </repository>
+        <snapshotRepository>
+            <id>cma-repo-snap</id>
+            <url>http://maven.cmastudios.me/archiva/repository/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
         <repository>
-            <id>cmastudios-repo</id>
-            <url>http://cmastudios.me/repo/maven/</url>
+            <id>cma-repo</id>
+            <url>http://maven.cmastudios.me/archiva/repository/internal/</url>
         </repository>
     </repositories>
     <dependencies>
         <dependency>
             <groupId>com.tommytony</groupId>
             <artifactId>war</artifactId>
-            <version>0.1</version>
+            <version>1.7.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -50,7 +59,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.4.6-R0.1</version>
+            <version>1.5.2-R0.1</version>
         </dependency>
     </dependencies>
     <build>
@@ -67,13 +76,8 @@
         </plugins>
         <resources>
             <resource>
-                <targetPath>.</targetPath>
                 <filtering>true</filtering>
                 <directory>${basedir}/src/main/resources/</directory>
-                <includes>
-                    <include>plugin.yml</include>
-                    <include>config.yml</include>
-                </includes>
             </resource>    
         </resources>
     </build>

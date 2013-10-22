@@ -1,9 +1,9 @@
 name: ${project.name}
 version: ${project.version}
-description: Karmic auto-ranking
+description: ${project.description}
 author: tommytony
 authors: [cmastudios, grinning]
-website: http://tommytony.us/
+website: ${project.url}
 
 main: com.tommytony.karma.KarmaPlugin
 

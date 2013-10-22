@@ -1,5 +1,8 @@
 package com.tommytony.karma;
 
+import com.tommytony.war.Team;
+import com.tommytony.war.War;
+import com.tommytony.war.Warzone;
 import org.bukkit.OfflinePlayer;
 
 /**
@@ -32,7 +35,8 @@ public class KarmaPlayer {
         if (pointsToAdd > 0) {
             int before = this.karmaPoints;
             this.karmaPoints += pointsToAdd;
-            this.karma.checkForPromotion(this, before, this.karmaPoints);
+//            this.karma.checkForPromotion(this, before, this.karmaPoints);
+            this.updatePermissions(before, this.karmaPoints);
             this.karma.getKarmaDatabase().put(this);
         }
     }
@@ -67,8 +71,38 @@ public class KarmaPlayer {
             if (this.karmaPoints < this.track.getFirstGroup().getKarmaPoints()) {
                 this.karmaPoints = this.track.getFirstGroup().getKarmaPoints();
             }
-            this.karma.checkForDemotion(this, before, this.karmaPoints, automatic);
+            if (!karma.config.getBoolean("demotion.demotetofirstgroup", true) && automatic) {
+                KarmaGroup secondGroup = this.track.getNextGroup(track.getFirstGroup());
+                // Player was previously in the second group and is no longer in this group
+                if (secondGroup != null && before >= secondGroup.getKarmaPoints()
+                        && this.karmaPoints < secondGroup.getKarmaPoints()
+                        && track.isFirst()) { // First track only
+                    // Prevent losing enough karma to cause a demotion into the first group.
+                    this.karmaPoints = secondGroup.getKarmaPoints();
+                }
+            }
+            this.updatePermissions(before, this.karmaPoints);
             this.karma.getKarmaDatabase().put(this);
+        }
+    }
+
+    /**
+     * Set a player's karma point value directly.
+     * @param amount the amount of karma points.
+     * @throws IllegalArgumentException amount to set is less than zero.
+     */
+    public void setKarmaPoints(int amount) {
+        if (amount != this.getKarmaPoints()) {
+            if (amount >= 0) {
+                int before = this.getKarmaPoints();
+                if (amount > this.getKarmaPoints()) {
+                    this.addKarma(amount - this.getKarmaPoints());
+                } else {
+                    this.removeKarma(this.getKarmaPoints() - amount);
+                }
+            } else {
+                throw new IllegalArgumentException("amount cannot be a negative number.");
+            }
         }
     }
 
@@ -125,8 +159,11 @@ public class KarmaPlayer {
      * @return true if the player can gift, false otherwise
      */
     public boolean canGift() {
+        if (karma.config.getInt("gift.cooldown", 60) == 0) {
+            return true;
+        }
         long since = System.currentTimeMillis() - getLastGiftTime();
-        return since > 3600 * 1000;
+        return since > (60 * karma.config.getInt("gift.cooldown", 60)) * 1000;
     }
 
     /**
@@ -148,6 +185,7 @@ public class KarmaPlayer {
         if (this.getKarmaPoints() < track.getFirstGroup().getKarmaPoints()) {
             this.addKarma(track.getFirstGroup().getKarmaPoints() - this.getKarmaPoints());
         }
+        this.karma.getKarmaDatabase().put(this);
     }
 
     /**
@@ -158,7 +196,7 @@ public class KarmaPlayer {
     public KarmaGroup getGroupByPermissions() {
         for (KarmaGroup currentGroup : getTrack()) {
             if (getKarmaPoints() >= currentGroup.getKarmaPoints()) {
-                String perm = "karma." + currentGroup.getGroupName();
+                String perm = currentGroup.getPermission();
                 if (getPlayer().isOnline() &&
                         !getPlayer().getPlayer().hasPermission(perm) && currentGroup == getTrack().getFirstGroup()) {
                     throw new NullPointerException(getName() + " does not have permissions for the start group! "
@@ -179,6 +217,54 @@ public class KarmaPlayer {
             }
         }
         return null;
+    }
+
+    /**
+     * Updates permissions for a promote/demote on the same track.
+     * This does not handle track switches.
+     * @param before karma points before change.
+     * @param after karma points after change.
+     * @see #setGroup(com.tommytony.karma.KarmaGroup) Use for track changes.
+     */
+    protected void updatePermissions(int before, int after) {
+        KarmaGroup oldGroup = this.track.getGroupOnBounds(before);
+        KarmaGroup newGroup = this.track.getGroupOnBounds(after);
+        if (oldGroup == null || newGroup == null) {
+            throw new NullPointerException("Could not find player's group after karma change.");
+        }
+        if (oldGroup == newGroup) {
+            return;
+        }
+        switch (oldGroup.compareTo(newGroup)) {
+            case -1:
+                karma.runCommand(karma.config.getString("promotion.command")
+                        .replace("<player>", name)
+                        .replace("<group>", newGroup.getGroupName()));
+                if (this.getPlayer().isOnline()) {
+                    if (this.getGroupByPermissions() != newGroup) {
+                        throw new NullPointerException("Attempted to promote player " + this.name + " to group " + newGroup.getGroupName()
+                                + ", but after promotion, the player doesn't have " + newGroup.getPermission() + "! Promote command configured incorrectly.");
+                    }
+                }
+                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.PROMOTED", new Object[] {name, newGroup.getFormattedName()}));
+                karma.log.info(name + " promoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
+                break;
+            case 1:
+                karma.runCommand(karma.config.getString("demotion.command")
+                        .replace("<player>", name)
+                        .replace("<group>", newGroup.getGroupName()));
+                if (this.getPlayer().isOnline()) {
+                    if (this.getGroupByPermissions() != newGroup) {
+                        throw new NullPointerException("Attempted to demote player " + this.name + " to group " + newGroup.getGroupName()
+                                + ", but after demotion, the player isn't in this group! Demote command configured incorrectly.");
+                    }
+                }
+                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.DEMOTED", new Object[] {name, newGroup.getFormattedName()}));
+                karma.log.info(name + " demoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -203,5 +289,57 @@ public class KarmaPlayer {
      */
     public OfflinePlayer getPlayer() {
         return karma.server.getOfflinePlayer(getName());
+    }
+
+    /**
+     * Check if a player is AFK.
+     * AFK players do not receive karma in a karma party.
+     * @return true if the player is AFK, false otherwise
+     */
+    public boolean isAfk() {
+        long activeInterval = System.currentTimeMillis() - this.getLastActivityTime();
+        int minutesAfk = (int) Math.floor(activeInterval / (1000 * 60));
+        return minutesAfk >= karma.config.getInt("afk.time", 10);
+    }
+    /**
+     * Check if a player is playing in a warzone.
+     * @return true if player is playing war, false otherwise
+     */
+    public boolean isPlayingWar() {
+        if (!karma.warEnabled) {
+            throw new NullPointerException("The war plugin is not enabled");
+        }
+        if (Warzone.getZoneByPlayerName(name) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Check if the player has made a warzone which people are currently playing
+     * in.
+     * Notice: this will only return true if players are playing in this
+     * player's warzone actively.
+     * @return true if player has a warzone, false otherwise
+     */
+    public boolean hasActiveWarzone() {
+        if (!karma.warEnabled) {
+            throw new NullPointerException("The war plugin is not enabled");
+        }
+        for (Warzone zone : War.war.getWarzones()) {
+            for (String author : zone.getAuthors()) {
+                if (author.equals(name) && zone.isEnoughPlayers() && this.getPlayersInWarzone(zone) > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private int getPlayersInWarzone(Warzone zone) {
+        int players = 0;
+        for (Team team : zone.getTeams()) {
+            players += team.getPlayers().size();
+        }
+        return players;
     }
 }

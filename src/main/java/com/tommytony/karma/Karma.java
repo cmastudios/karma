@@ -1,10 +1,15 @@
 package com.tommytony.karma;
 
+import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.logging.Logger;
+import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -18,6 +23,7 @@ public class Karma {
     public boolean warEnabled;
     public Logger log;
     public List<KarmaTrack> tracks;
+    public ResourceBundle messages;
 
     public Karma() {
         random = new Random();
@@ -25,11 +31,13 @@ public class Karma {
         tracks = new ArrayList<KarmaTrack>();
     }
 
+    @Deprecated
     public boolean setAmount(List<Player> matches, int amount) {
         Player playerTarget = matches.get(0);
         return this.setAmount(playerTarget, amount);
     }
 
+    @Deprecated
     public boolean setAmount(Player playerTarget, int amount) {
         KarmaPlayer karmaTarget = this.getPlayers().get(playerTarget.getName());
         if (karmaTarget != null && amount != karmaTarget.getKarmaPoints()) {
@@ -68,21 +76,19 @@ public class Karma {
                             && !(karmaPlayer.getTrack().getNextGroup(currentGroup) != null && karmaPlayer.getKarmaPoints() >= karmaPlayer.getTrack().getNextGroup(currentGroup).getKarmaPoints())) {
                         // either doesn't have a next rank or can't beat the
                         // next rank's k points, we found the right rank
-                        this.runCommand(config.getString("promotion.command")
-                            .replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
+                        this.runCommand(config.getString("promotion.command").replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
                         for (Player playerOnline : server.getOnlinePlayers()) {
-                            this.msg(playerOnline,
-                                    config.getString("promotion.message").replace("<player>", playerName).replace("<group>", currentGroup.getGroupName()).replace("<groupcolor>", currentGroup.getChatColor().toString()));
+                            this.msg(playerOnline, this.getString("PLAYER.PROMOTED", new Object[] {player.getName(), currentGroup.getFormattedName()}));
                         }//end for
                     }//end if
-                }//end while	
+                }//end while
                 // Check if a player has enough karma points for his rank, if not, add them
                 // This prevents problems when server admins use their permission manager's commands for promotions instead of karma's
                 // TODO: add configuration option to disable this for setups with one mysql db for karma but multiple servers
                 for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
                     if (karmaPlayer.getKarmaPoints() < currentGroup.getKarmaPoints()
                             && player.hasPermission(currentGroup.getPermission())) {
-                        this.setAmount(player, currentGroup.getKarmaPoints());
+                        karmaPlayer.setKarmaPoints(currentGroup.getKarmaPoints());
                     }//end if
                 }//end while
 
@@ -97,7 +103,7 @@ public class Karma {
                     karmaPlayer.removeKarmaAutomatic(howManyDays);
                     StringBuilder message = new StringBuilder();
                     message.append(player.getName()).append(" lost ").append(before - karmaPlayer.getKarmaPoints()).append(" karma points.");
-                    log.info(message.toString());
+                    log.finer(message.toString());
                 }
 
                 // update last activity
@@ -112,9 +118,8 @@ public class Karma {
             players.put(player.getName(), karmaPlayer);
             db.put(karmaPlayer);
 
-            this.msg(player, config.getString("newplayer.message"));
-            log.info("Karma> " + player.getName() + " created with "
-                    + initialKarma + " karma points");
+            this.msg(player, this.getString("WELCOME"));
+            log.finer(player.getName() + " created with " + initialKarma + " karma points");
         }
     }
 
@@ -178,7 +183,6 @@ public class Karma {
                 }
             }
         }
-        // Sort the groups by point value
         Collections.sort(groupList);
         if (groupList.isEmpty()) {
             // If player is new, give them default track
@@ -189,7 +193,12 @@ public class Karma {
         return groupList.get((groupList.size()-1)).getTrack(tracks);
     }
 
+    //<editor-fold defaultstate="collapsed" desc="deprecated code">
+    @Deprecated
     public void checkForPromotion(KarmaPlayer player, int before, int after) {
+        if (!player.getPlayer().isOnline()) {
+            return;
+        }
         Player playerForPromotion = player.getPlayer().getPlayer();
         for (KarmaGroup group : player.getTrack()) {
             String perm = group.getPermission();
@@ -199,7 +208,7 @@ public class Karma {
             if (before < group.getKarmaPoints()
                     && after >= group.getKarmaPoints()
                     && !playerForPromotion.hasPermission(perm)) {
-                
+
                 this.runCommand(config.getString("promotion.command")
                         .replace("<player>", player.getName())
                         .replace("<group>", group.getGroupName()));
@@ -218,7 +227,11 @@ public class Karma {
         }
     }
 
+    @Deprecated
     public void checkForDemotion(KarmaPlayer player, int before, int after, boolean automatic) {
+        if (!player.getPlayer().isOnline()) {
+            return;
+        }
         Player playerForDemotion = player.getPlayer().getPlayer();
         ListIterator<KarmaGroup> li = player.getTrack().reverseListIterator();
         while (li.hasPrevious()) {
@@ -233,7 +246,7 @@ public class Karma {
                     && after < group.getKarmaPoints()
                     && after >= previousGroup.getKarmaPoints()) {
 
-                if (previousGroup.isFirstGroup(player.getTrack()) && player.getTrack().isFirst() 
+                if (previousGroup.isFirstGroup(player.getTrack()) && player.getTrack().isFirst()
                         && !config.getBoolean("demotion.demotetofirstgroup") && automatic) {
                     return; // Prevents players from being demoted to the first group automatically
                 }
@@ -345,7 +358,7 @@ public class Karma {
         }
         return null;
     }
-
+    //</editor-fold>
     public int getNextRandomKarmaPartyDelay() {
         // on average 20, between 10 min and 30 min
         int minutes = config.getInt("party.time.minimum")
@@ -353,7 +366,7 @@ public class Karma {
                 - config.getInt("party.time.minimum"));
         // 20 ticks/second, 60 seconds/min
         int ticks = minutes * 20 * 60;
-        log.info("Next karma party in " + minutes + " minutes or " + ticks + " ticks.");
+        log.fine("Next karma party in " + minutes + " minutes or " + ticks + " ticks.");
         return ticks;
     }
     protected void loadTracks() {
@@ -374,8 +387,8 @@ public class Karma {
                 track.setFirst(true);
                 continue;
             }
-            ret.add(new KarmaGroup(group, 
-                    config.getInt("tracks." + track.getName() + "." + group + ".points"), 
+            ret.add(new KarmaGroup(group,
+                    config.getInt("tracks." + track.getName() + "." + group + ".points"),
                     ChatColor.getByChar(
                     config.getString("tracks." + track.getName() + "." + group + ".color"))));
         }
@@ -401,20 +414,42 @@ public class Karma {
     }
 
     public void msg(CommandSender destination, String message) {
-        if (message == null || "".equals(message)) {
-            return;
+        for (String s : this.processMessage(message)) {
+            if (destination instanceof ConsoleCommandSender) {
+                // Remove formatting from messages going to console
+                destination.sendMessage(ChatColor.stripColor(s));
+            } else {
+                destination.sendMessage(s);
+            }
         }
-        
+    }
+
+    public void msg(List<CommandSender> destinations, String message) {
+        for (CommandSender dest : destinations) {
+            this.msg(dest, message);
+        }
+    }
+
+    public void msg(CommandSender[] destinations, String message) {
+        this.msg(Arrays.asList(destinations), message);
+    }
+
+    protected List<String> processMessage(String message) {
+        if (message == null || "".equals(message)) {
+            throw new NullPointerException("message cannot be null");
+        }
         message = message.replaceAll("<NEWLINE>", "\n");
+        List<String> ret = new ArrayList<String>();
         if (message.contains("\n")) {
             for (String s : message.split("\n")) {
-                destination.sendMessage(parseColor(config.getString("prefix")
-                        + s));
+                ret.add(parseColor(this.getString("PREFIX") + s));
             }
-            return;
+            return ret;
         }
-        destination.sendMessage(parseColor(config.getString("prefix") + message));
+        ret.add(parseColor(this.getString("PREFIX") + message));
+        return ret;
     }
+
     /**
      * Get a track by name
      * @param name the tracks name
@@ -450,7 +485,47 @@ public class Karma {
         return players;
     }
 
+    public KarmaPlayer getPlayer(String player) {
+        if (players.containsKey(player)) {
+            return players.get(player);
+        } else {
+            return db.get(player);
+        }
+    }
+
+    public OfflinePlayer getBukkitPlayer(String player) {
+        if (server.getPlayer(player) == null) {
+            if (server.getOfflinePlayer(player).hasPlayedBefore()) {
+                return server.getOfflinePlayer(player);
+            } else {
+                return null;
+            }
+        } else {
+            return server.getPlayer(player);
+        }
+    }
+
     public Database getKarmaDatabase() {
         return db;
+    }
+
+    public String getString(String key) {
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+        return messages.getString(key).replace("''", "'");
+    }
+    public String getString(String key, Object[] args) {
+        Validate.notNull(key);
+        Validate.notEmpty(key);
+        return MessageFormat.format(messages.getString(key), args);
+    }
+
+    public String parseNumber(double dbl) {
+        NumberFormat numberInstance = NumberFormat.getNumberInstance(Locale.getDefault());
+        return numberInstance.format(dbl);
+    }
+    public String parseNumber(long lng) {
+        NumberFormat numberInstance = NumberFormat.getNumberInstance(Locale.getDefault());
+        return numberInstance.format(lng);
     }
 }

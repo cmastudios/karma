@@ -1,4 +1,4 @@
-# KARMA+ CONFIGURATION FILE
+# KARMA CONFIGURATION FILE
 #
 # Add the config node 'karma.<GROUP>' in your
 # permissions setup for the specified group for them to 
@@ -12,9 +12,7 @@
 # karma.set: Allow access to change the raw amount of
 #   karma a player has (like to reward them with karma)
 #
-# -PUT GROUPS IN DECREASING ORDER- Since 0.3, it doesn't matter :D
 
-prefix: '&5Karma>&d '
 tracks:
     default:
         default: true
@@ -52,70 +50,33 @@ tracks:
             points: 50000
 party:
     time:
+        # unit: minutes
         minimum: 10
+        # unit: minutes
         maximum: 30
     points: 1
-    messages:
-        announce: It's a &a/karma&d party!
-        pointgain: You gain &a<points>&d karma point(s).
-        afknogain: You lost out on &a<points>&d karma point(s) because you were AFK.
+    silent: false
 promotion:
     command: |
         manuadd <player> <group>
         mansave
-    message: Good karma! &a<player>&d promoted to <groupcolor><group>&d.
-    eligibleMessage: You are now eligible for the group `<groupcolor><group>' in track `<track>'. Contact the admins for more information.
 demotion:
     command: |
         manuadd <player> <group>
         mansave
-    message: Bad karma. &a<player>&d demoted to <groupcolor><group>&d.
     demotetofirstgroup: false
 gift:
-    amount: 1
-    messages:
-        togifter: You gave &a<player> <points>&d karma. How generous!
-        toreceiver: '&a<player>&d gave you &a<points>&d karma.'
-        cooldown: You need to wait &a<minutes>&d minutes before gifting again.
-check:
-    self:
-        message: |
-            You have &a<points>&d karma points.
-            Current rank: <curgroupcolor><curgroup>&d. Next rank: <nextgroupcolor><nextgroup>
-    others:
-        message: <curgroupcolor><player>&d has &a<points>&d karma points.
-promocommand:
-    messages:
-        highest: '&cThat player is already the highest rank.'
-        promoted: '&a<player>&d promoted to &a<group>&d.'
-changetrack:
-    message: <player>'s track switched to <track> and group switched to <groupcolor><group>
-newplayer:
-    message: |
-        This server supports automatic ranking.
-        Use &a/karma help&d for more information.
-viewranks:
-    prefix: 'Ranks: '
-help: |
-    Use &a/karma&d to check your karma points.
-    Use &a/karma <person>&d to see points of others.
-    Use &a/karma gift <person>&d to give karma to another player.
-    Use &a/karma ranks&d to view earnable ranks.
-    Use &a/k&d as an alias
-admin-help: |
-    &cAdministration commands:
-    Use &a/karma set <person> <amount>&d to set a player's karma.
-    Use &a/karma add <person> <amount>&d to add to a player's karma.
-    Use &a/karma promote <person>&d to promote a player.
-    Use &a/karma track <person> <track>&d to set a player's track.
-errors:
-    noplayer: '&cCannot find the player'
-    nopermission: '&cYou do not have permission'
-    notrack: '&cCannot find the track'
-    isalreadyintrack: '&cThe player is already in that track'
-    unknowncommand: '&cUnknown command. Use &a/karma help&d.'
-    commandexception: '&cException <exception> occured while processing your command.'
-    badargs: '&cBad Arguments!.'
+    amounts:
+        default: 1
+        minimum: 1
+        maximum: 1
+    confirm:
+        enabled: true
+        # unit: seconds
+        timeout: 60
+    offline: false
+    # unit: minutes
+    cooldown: 60
 war:
     bonus: true
     chance: 0.25
@@ -135,10 +96,12 @@ mysql:
     password: 12345
     database: karma
 afk:
+    # unit: minutes
+    time: 10
     triggers:
         chat: true
         command: true
         build: true
 # Enabling move can drastically decrease server performance
         move: false
-        
+        damage: true

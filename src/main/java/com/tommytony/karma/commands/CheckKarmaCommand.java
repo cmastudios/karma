@@ -2,10 +2,11 @@ package com.tommytony.karma.commands;
 
 import com.tommytony.karma.Karma;
 import com.tommytony.karma.KarmaPlayer;
+import org.apache.commons.lang.Validate;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public class CheckKarmaCommand implements CommandExecutor {
 
@@ -16,21 +17,16 @@ public class CheckKarmaCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        Player checkOtherTarget = karma.server.getPlayer(args[0]);
-        if (checkOtherTarget == null) {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
-            return true;
-        }
-        KarmaPlayer karmaCheckOtherTarget = karma.players.get(checkOtherTarget.getName());
-        if (karmaCheckOtherTarget != null) {
-            karma.msg(
-                    sender,
-                    karma.config.getString("check.others.message")
-                    .replace("<player>",checkOtherTarget.getName())
-                    .replace("<points>", Integer.toString(karmaCheckOtherTarget.getKarmaPoints()))
-                    .replace( "<curgroupcolor>", karmaCheckOtherTarget.getGroup().getChatColor().toString()));
+        OfflinePlayer playerTarget = karma.getBukkitPlayer(args[0]);
+        Validate.notNull(playerTarget, karma.getString("ERROR.PLAYER404", new Object[] {args[0]}));
+        Validate.isTrue(playerTarget.hasPlayedBefore(), karma.getString("ERROR.PLAYER404", new Object[] {args[0]}));
+        KarmaPlayer target = karma.getPlayer(playerTarget.getName());
+        if (target != null) {
+            karma.msg(sender, karma.getString("CHECK.OTHERS", new Object[] {
+                target.getGroup().getChatColor() + target.getName(),
+                target.getKarmaPoints()}));
         } else {
-            karma.msg(sender, karma.config.getString("errors.noplayer"));
+            karma.msg(sender, karma.getString("ERROR.PLAYER404.NOKP", new Object[] {playerTarget.getName()}));
         }
         return true;
     }
