@@ -215,8 +215,8 @@ public class Karma {
         if (command.contains("\n")) {
             for (String c : command.split("\n")) {
                 server.dispatchCommand(server.getConsoleSender(), c);
-                return;
             }
+            return;
         }
         server.dispatchCommand(server.getConsoleSender(), command);
     }
