@@ -52,7 +52,7 @@ public class Database {
      * @return karma player
      */
     public KarmaPlayer get(OfflinePlayer player) {
-        if (this.sqlite())
+        if (!this.sqlite())
             throw new RuntimeException("Err... why do you not have SQLite installed?");
         try (Connection conn = this.getConnection()) {
             // First check the database to see if the user is either in name or UUID format
@@ -92,7 +92,7 @@ public class Database {
     }
 
     public void put(KarmaPlayer karmaPlayer) {
-        if (this.sqlite())
+        if (!this.sqlite())
             throw new RuntimeException("Err... why do you not have SQLite installed?");
         try (Connection conn = this.getConnection()) {
             if (inlineExistsUUID(karmaPlayer.getPlayer(), conn)) {
