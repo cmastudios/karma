@@ -33,65 +33,62 @@ public class Karma {
 
 	public void loadOrCreateKarmaPlayer(Player player) {
         String playerName = player.getName();
-        if (db.exists(playerName)) {
-            // existing player
-            KarmaPlayer karmaPlayer = db.get(playerName);
-            if (karmaPlayer != null) {
-                players.put(playerName, karmaPlayer);
-
-                // check if player needs a promo, in case perms got wiped
-                // BONUS: this lets you change perms systems without having
-                // to migrate - ex: just change the GM commands to bPerms
-                for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
-                    if (karmaPlayer.getKarmaPoints() >= currentGroup.getKarmaPoints() // Player has enough karma for this rank
-                            && !player.hasPermission(currentGroup.getPermission()) // and he doesn't have permission for it...
-                            // and he doesn't have the karma for his next group
-                            && !(karmaPlayer.getTrack().getNextGroup(currentGroup) != null && karmaPlayer.getKarmaPoints() >= karmaPlayer.getTrack().getNextGroup(currentGroup).getKarmaPoints())) {
-                        // either doesn't have a next rank or can't beat the
-                        // next rank's k points, we found the right rank
-                        this.runCommand(config.getString("promotion.command").replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
-                        for (Player playerOnline : server.getOnlinePlayers()) {
-                            this.msg(playerOnline, this.getString("PLAYER.PROMOTED", new Object[] {player.getName(), currentGroup.getFormattedName()}));
-                        }//end for
-                    }//end if
-                }//end while
-                // Check if a player has enough karma points for his rank, if not, add them
-                // This prevents problems when server admins use their permission manager's commands for promotions instead of karma's
-                // TODO: add configuration option to disable this for setups with one mysql db for karma but multiple servers
-                for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
-                    if (karmaPlayer.getKarmaPoints() < currentGroup.getKarmaPoints()
-                            && player.hasPermission(currentGroup.getPermission())) {
-                        karmaPlayer.setKarmaPoints(currentGroup.getKarmaPoints());
-                    }//end if
-                }//end while
-
-                // check for last activity, remove one karma point per day off
-                // TODO: make time and loss configurable
-                long gone = System.currentTimeMillis()
-                        - karmaPlayer.getLastActivityTime();
-                int howManyDays = (int) Math.floor(gone / 86400000L);
-
-                if (howManyDays > 0) {
-                    int before = karmaPlayer.getKarmaPoints();
-                    karmaPlayer.removeKarmaAutomatic(howManyDays);
-                    log.finer(String.format("%s lost %d karma points.", player.getName(), before - karmaPlayer.getKarmaPoints()));
-                }
-
-                // update last activity
-                karmaPlayer.ping();
-                db.put(karmaPlayer);
-            }
-        } else {
+        if (!db.exists(player)) {
             // create player
             int initialKarma = this.getInitialKarma(player);
-            KarmaPlayer karmaPlayer = new KarmaPlayer(this, player,
-                    initialKarma, System.currentTimeMillis(), 0, getInitialTrack(player));
+            KarmaPlayer karmaPlayer = new KarmaPlayer(this, player, initialKarma, System.currentTimeMillis(), 0,
+                    getInitialTrack(player));
             players.put(player.getName(), karmaPlayer);
             db.put(karmaPlayer);
 
             this.msg(player, this.getString("WELCOME"));
             log.finer(String.format("%s created with %d karma points", player.getName(), initialKarma));
+            return;
         }
+        KarmaPlayer karmaPlayer = db.get(player);
+        players.put(playerName, karmaPlayer);
+
+        // check if player needs a promo, in case perms got wiped
+        // BONUS: this lets you change perms systems without having
+        // to migrate - ex: just change the GM commands to bPerms
+        for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
+            if (karmaPlayer.getKarmaPoints() >= currentGroup.getKarmaPoints() // Player has enough karma for this rank
+                    && !player.hasPermission(currentGroup.getPermission()) // and he doesn't have permission for it...
+                    // and he doesn't have the karma for his next group
+                    && !(karmaPlayer.getTrack().getNextGroup(currentGroup) != null && karmaPlayer.getKarmaPoints() >= karmaPlayer.getTrack().getNextGroup(currentGroup).getKarmaPoints())) {
+                // either doesn't have a next rank or can't beat the
+                // next rank's k points, we found the right rank
+                this.runCommand(config.getString("promotion.command").replace("<player>", player.getName()).replace("<group>", currentGroup.getGroupName()));
+                for (Player playerOnline : server.getOnlinePlayers()) {
+                    this.msg(playerOnline, this.getString("PLAYER.PROMOTED", new Object[] {player.getName(), currentGroup.getFormattedName()}));
+                }//end for
+            }//end if
+        }//end while
+        // Check if a player has enough karma points for his rank, if not, add them
+        // This prevents problems when server admins use their permission manager's commands for promotions instead of karma's
+        // TODO: add configuration option to disable this for setups with one mysql db for karma but multiple servers
+        for (KarmaGroup currentGroup : karmaPlayer.getTrack()) {
+            if (karmaPlayer.getKarmaPoints() < currentGroup.getKarmaPoints()
+                    && player.hasPermission(currentGroup.getPermission())) {
+                karmaPlayer.setKarmaPoints(currentGroup.getKarmaPoints());
+            }//end if
+        }//end while
+
+        // check for last activity, remove one karma point per day off
+        // TODO: make time and loss configurable
+        long gone = System.currentTimeMillis()
+                - karmaPlayer.getLastActivityTime();
+        int howManyDays = (int) Math.floor(gone / 86400000L);
+
+        if (howManyDays > 0) {
+            int before = karmaPlayer.getKarmaPoints();
+            karmaPlayer.removeKarmaAutomatic(howManyDays);
+            log.finer(String.format("%s lost %d karma points.", player.getName(), before - karmaPlayer.getKarmaPoints()));
+        }
+
+        // update last activity
+        karmaPlayer.ping();
+        db.put(karmaPlayer);
     }
 
     protected int getInitialKarma(Player player) {
@@ -298,7 +295,7 @@ public class Karma {
         if (players.containsKey(player)) {
             return players.get(player);
         } else {
-            return db.get(player);
+            return db.get(server.getOfflinePlayer(player));
         }
     }
 
