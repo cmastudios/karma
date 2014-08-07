@@ -74,9 +74,7 @@ public class Karma {
                 if (howManyDays > 0) {
                     int before = karmaPlayer.getKarmaPoints();
                     karmaPlayer.removeKarmaAutomatic(howManyDays);
-                    StringBuilder message = new StringBuilder();
-                    message.append(player.getName()).append(" lost ").append(before - karmaPlayer.getKarmaPoints()).append(" karma points.");
-                    log.finer(message.toString());
+                    log.finer(String.format("%s lost %d karma points.", player.getName(), before - karmaPlayer.getKarmaPoints()));
                 }
 
                 // update last activity
@@ -86,13 +84,13 @@ public class Karma {
         } else {
             // create player
             int initialKarma = this.getInitialKarma(player);
-            KarmaPlayer karmaPlayer = new KarmaPlayer(this, player.getName(),
+            KarmaPlayer karmaPlayer = new KarmaPlayer(this, player,
                     initialKarma, System.currentTimeMillis(), 0, getInitialTrack(player));
             players.put(player.getName(), karmaPlayer);
             db.put(karmaPlayer);
 
             this.msg(player, this.getString("WELCOME"));
-            log.finer(player.getName() + " created with " + initialKarma + " karma points");
+            log.finer(String.format("%s created with %d karma points", player.getName(), initialKarma));
         }
     }
 
@@ -127,8 +125,7 @@ public class Karma {
     }
 
     protected KarmaTrack getInitialTrack(Player player) {
-        KarmaTrack ret;
-        // List of all the groups that this player belongs to
+		// List of all the groups that this player belongs to
         // It only lists a group if it is the last group in a track they have
         // permission for
         List<KarmaGroup> groupList = new ArrayList<KarmaGroup>();

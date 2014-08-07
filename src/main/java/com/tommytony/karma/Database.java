@@ -63,7 +63,7 @@ public class Database {
                             track = karma.getDefaultTrack();
                         }
                     }
-                    karmaPlayer = new KarmaPlayer(this.karma, playerName, 
+                    karmaPlayer = new KarmaPlayer(this.karma, karma.getBukkitPlayer(playerName),
                             result.getInt("karma"), 
                             result.getLong("lastactive"), 
                             result.getLong("lastgift"), 
@@ -87,23 +87,14 @@ public class Database {
                 Statement stat = conn.createStatement();
                 if (exists) {
                     // update
-// Tom's bad code                   
-//                    stat.executeUpdate(
-//                            "update players set karma=" + karmaPlayer.getKarmaPoints()
-//                            + ", lastactive=" + karmaPlayer.getLastActivityTime()
-//                            + ", lastgift=" + karmaPlayer.getLastGiftTime()
-//                            + " where name='" + karmaPlayer.getName() + "'");
-                    // Cma's good code
                     PreparedStatement pstmt = conn.prepareStatement(
                     "UPDATE players SET karma = ?, lastactive = ?, lastgift = ?, track = ? WHERE name = ?");
                     pstmt.setInt(1, karmaPlayer.getKarmaPoints());
                     pstmt.setLong(2, karmaPlayer.getLastActivityTime());
                     pstmt.setLong(3, karmaPlayer.getLastGiftTime());
-                    //TODO: Don't Ever store anything in a database as a String unless you are absolutly forced to cma, assign numbers to the tracks... -grin
                     pstmt.setLong(4, karmaPlayer.getTrack().getName().hashCode());
                     pstmt.setString(5, karmaPlayer.getName());
                     pstmt.executeUpdate();
-                    // See, much better!
                 } else {
                     // insert
                     PreparedStatement pstmt = conn.prepareStatement(
@@ -114,10 +105,6 @@ public class Database {
                     pstmt.setLong(4, karmaPlayer.getLastGiftTime());
                     pstmt.setLong(5, karmaPlayer.getTrack().getName().hashCode());
                     pstmt.executeUpdate();
-
-//                    stat.executeUpdate(
-//                            "insert into players values ('" + karmaPlayer.getName() + "', "
-//                            + karmaPlayer.getKarmaPoints() + ", " + karmaPlayer.getLastActivityTime() + ", " + karmaPlayer.getLastGiftTime() + ", 0)");
                 }
                 stat.close();
                 conn.close();
