@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 import static junit.framework.Assert.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -94,7 +95,7 @@ public class ImportTest {
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(p.hasPermission("karma.zonemaker")).thenReturn(false);
         Server bukkitServ = mock(Server.class);
-        when(bukkitServ.getOnlinePlayers()).thenReturn(new Player[]{});
+        doReturn(new ArrayList<Player>()).when(bukkitServ).getOnlinePlayers();
         karma.server = bukkitServ;
         when(kp.getKarmaPoints()).thenReturn(15);
         when(config.getString("promotion.command")).thenReturn("pex user <player> setgroup <group>");
@@ -122,7 +123,7 @@ public class ImportTest {
         when(p.hasPermission("karma.builder")).thenReturn(false);
         when(p.hasPermission("karma.zonemaker")).thenReturn(false);
         Server bukkitServ = mock(Server.class);
-        when(bukkitServ.getOnlinePlayers()).thenReturn(new Player[]{});
+        doReturn(new ArrayList<Player>()).when(bukkitServ).getOnlinePlayers();
         karma.server = bukkitServ;
         when(kp.getKarmaPoints()).thenReturn(15);
         when(config.getString("promotion.command")).thenReturn("pex user <player> setgroup <group>");
@@ -144,7 +145,7 @@ public class ImportTest {
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(p.hasPermission("karma.zonemaker")).thenReturn(false);
         Server bukkitServ = mock(Server.class);
-        when(bukkitServ.getOnlinePlayers()).thenReturn(new Player[]{});
+        doReturn(new ArrayList<Player>()).when(bukkitServ).getOnlinePlayers();
         karma.server = bukkitServ;
         when(kp.getKarmaPoints()).thenReturn(15);
         when(config.getString("promotion.command")).thenReturn("pex user <player> setgroup <group>");

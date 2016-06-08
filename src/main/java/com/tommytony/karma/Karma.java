@@ -229,14 +229,16 @@ public class Karma {
         }
     }
 
-    public void msg(List<CommandSender> destinations, String message) {
-        for (CommandSender dest : destinations) {
+    public void msg(Collection<? extends Player> destinations, String message) {
+        for (Player dest : destinations) {
             this.msg(dest, message);
         }
     }
 
     public void msg(CommandSender[] destinations, String message) {
-        this.msg(Arrays.asList(destinations), message);
+        for (CommandSender dest : destinations) {
+            this.msg(dest, message);
+        }
     }
 
     protected List<String> processMessage(String message) {
