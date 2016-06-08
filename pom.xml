@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tommytony</groupId>
     <artifactId>karma</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <name>Karma</name>
     <url>http://dev.bukkit.org/bukkit-plugins/karma-ranking/</url>
     <description>Automatic ranking of players based on a point system</description>
@@ -10,23 +10,31 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <distributionManagement>
+        <site>
+            <id>warhub.net</id>
+            <url>ftp://warhub.net/var/www/html/karma/</url>
+        </site>
         <repository>
-            <id>cma-repo-int</id>
-            <url>http://maven.cmastudios.me/archiva/repository/internal/</url>
+            <id>war-repo</id>
+            <name>War Jenkins Maven Builds</name>
+            <url>http://ci.tommytony.com/plugin/repository/everything/</url>
         </repository>
-        <snapshotRepository>
-            <id>cma-repo-snap</id>
-            <url>http://maven.cmastudios.me/archiva/repository/snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
     <repositories>
         <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
+            <id>spigot-public</id>
+            <name>Spigot repositories</name>
+            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>cma-repo</id>
-            <url>http://maven.cmastudios.me/archiva/repository/internal/</url>
+            <url>http://ftp.cmastudios.me/maven/</url>
         </repository>
     </repositories>
     <dependencies>
@@ -45,21 +53,21 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>1.4.9</version>
+            <version>1.5.5</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
-            <version>1.4.9</version>
+            <version>1.5.5</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.5.2-R0.1</version>
+            <version>1.9.4-R0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -69,9 +77,14 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.0.2</version>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>7</source>
+                    <target>7</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.5.1</version>
             </plugin>
         </plugins>
         <resources>
@@ -80,5 +93,38 @@
                 <directory>${basedir}/src/main/resources/</directory>
             </resource>    
         </resources>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ftp</artifactId>
+                <version>1.0-beta-6</version>
+            </extension>
+        </extensions>
     </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.9</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>index</report>
+                            <report>summary</report>
+                            <report>distribution-management</report>
+                            <report>scm</report>
+                            <report>cim</report>
+                            <report>issue-tracking</report>
+                            <report>project-team</report>
+                            <report>mailing-list</report>
+                            <report>license</report>
+                            <report>dependency-info</report>
+                            <report>modules</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>

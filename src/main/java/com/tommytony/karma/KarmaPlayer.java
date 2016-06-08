@@ -11,15 +11,15 @@ import org.bukkit.OfflinePlayer;
 public class KarmaPlayer {
 
     private final Karma karma;
-    private final String name;
+    private final OfflinePlayer player;
     private int karmaPoints;
     private long lastActivityTime;
     private long lastGift;
     private KarmaTrack track;
 
-    public KarmaPlayer(Karma karma, String name, int karmaPoints, long lastActivityTime, long lastGift, KarmaTrack track) {
+    public KarmaPlayer(Karma karma, OfflinePlayer player, int karmaPoints, long lastActivityTime, long lastGift, KarmaTrack track) {
         this.karma = karma;
-        this.name = name;
+        this.player = player;
         this.karmaPoints = karmaPoints;
         this.lastActivityTime = lastActivityTime;
         this.lastGift = lastGift;
@@ -35,7 +35,6 @@ public class KarmaPlayer {
         if (pointsToAdd > 0) {
             int before = this.karmaPoints;
             this.karmaPoints += pointsToAdd;
-//            this.karma.checkForPromotion(this, before, this.karmaPoints);
             this.updatePermissions(before, this.karmaPoints);
             this.karma.getKarmaDatabase().put(this);
         }
@@ -94,8 +93,7 @@ public class KarmaPlayer {
     public void setKarmaPoints(int amount) {
         if (amount != this.getKarmaPoints()) {
             if (amount >= 0) {
-                int before = this.getKarmaPoints();
-                if (amount > this.getKarmaPoints()) {
+				if (amount > this.getKarmaPoints()) {
                     this.addKarma(amount - this.getKarmaPoints());
                 } else {
                     this.removeKarma(this.getKarmaPoints() - amount);
@@ -111,7 +109,7 @@ public class KarmaPlayer {
      * @return the player's name
      */
     public String getName() {
-        return name;
+        return player.getName();
     }
 
     /**
@@ -238,29 +236,29 @@ public class KarmaPlayer {
         switch (oldGroup.compareTo(newGroup)) {
             case -1:
                 karma.runCommand(karma.config.getString("promotion.command")
-                        .replace("<player>", name)
+                        .replace("<player>", this.getName())
                         .replace("<group>", newGroup.getGroupName()));
                 if (this.getPlayer().isOnline()) {
                     if (this.getGroupByPermissions() != newGroup) {
-                        throw new NullPointerException("Attempted to promote player " + this.name + " to group " + newGroup.getGroupName()
+                        throw new NullPointerException("Attempted to promote player " + this.getName() + " to group " + newGroup.getGroupName()
                                 + ", but after promotion, the player doesn't have " + newGroup.getPermission() + "! Promote command configured incorrectly.");
                     }
                 }
-                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.PROMOTED", new Object[] {name, newGroup.getFormattedName()}));
-                karma.log.info(name + " promoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
+                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.PROMOTED", new Object[] {this.getName(), newGroup.getFormattedName()}));
+                karma.log.info(this.getName() + " promoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
                 break;
             case 1:
                 karma.runCommand(karma.config.getString("demotion.command")
-                        .replace("<player>", name)
+                        .replace("<player>", this.getName())
                         .replace("<group>", newGroup.getGroupName()));
                 if (this.getPlayer().isOnline()) {
                     if (this.getGroupByPermissions() != newGroup) {
-                        throw new NullPointerException("Attempted to demote player " + this.name + " to group " + newGroup.getGroupName()
+                        throw new NullPointerException("Attempted to demote player " + this.getName() + " to group " + newGroup.getGroupName()
                                 + ", but after demotion, the player isn't in this group! Demote command configured incorrectly.");
                     }
                 }
-                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.DEMOTED", new Object[] {name, newGroup.getFormattedName()}));
-                karma.log.info(name + " demoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
+                karma.msg(this.karma.server.getOnlinePlayers(), karma.getString("PLAYER.DEMOTED", new Object[] {this.getName(), newGroup.getFormattedName()}));
+                karma.log.info(this.getName() + " demoted to " + newGroup.getGroupName() + " from " + oldGroup.getGroupName());
                 break;
             default:
                 break;
@@ -288,7 +286,7 @@ public class KarmaPlayer {
      * @return the player
      */
     public OfflinePlayer getPlayer() {
-        return karma.server.getOfflinePlayer(getName());
+        return player;
     }
 
     /**
@@ -309,11 +307,7 @@ public class KarmaPlayer {
         if (!karma.warEnabled) {
             throw new NullPointerException("The war plugin is not enabled");
         }
-        if (Warzone.getZoneByPlayerName(name) != null) {
-            return true;
-        } else {
-            return false;
-        }
+		return Warzone.getZoneByPlayerName(this.getName()) != null;
     }
     /**
      * Check if the player has made a warzone which people are currently playing
@@ -328,7 +322,7 @@ public class KarmaPlayer {
         }
         for (Warzone zone : War.war.getWarzones()) {
             for (String author : zone.getAuthors()) {
-                if (author.equals(name) && zone.isEnoughPlayers() && this.getPlayersInWarzone(zone) > 0) {
+                if (author.equals(this.getName()) && zone.isEnoughPlayers() && this.getPlayersInWarzone(zone) > 0) {
                     return true;
                 }
             }

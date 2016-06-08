@@ -3,9 +3,8 @@ package com.tommytony.karma;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListResourceBundle;
-import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 import static junit.framework.Assert.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -45,7 +44,7 @@ public class ImportTest {
         p = mock(Player.class);
         event = PowerMockito.mock(PlayerJoinEvent.class);
         when(p.getName()).thenReturn("cmastudios");
-        when(event.getPlayer()).thenReturn(p);
+        PowerMockito.when(event.getPlayer()).thenReturn(p);
         groups = Arrays.asList(
                 new KarmaGroup("recruit", 0, ChatColor.WHITE),
                 new KarmaGroup("builder", 10, ChatColor.BLACK),
@@ -62,7 +61,7 @@ public class ImportTest {
 
     @Test
     public void testNewPlayerPermissionImportNoBonus() {
-        when(db.exists("cmastudios")).thenReturn(false);
+        when(db.exists(p)).thenReturn(false);
         when(p.hasPermission("karma.recruit")).thenReturn(true);
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(config.getBoolean("import.bonus")).thenReturn(false);
@@ -74,7 +73,7 @@ public class ImportTest {
     }
     @Test
     public void testNewPlayerPermissionImportBonus() {
-        when(db.exists("cmastudios")).thenReturn(false);
+        when(db.exists(p)).thenReturn(false);
         when(p.hasPermission("karma.recruit")).thenReturn(true);
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(config.getBoolean("import.bonus")).thenReturn(true);
@@ -90,13 +89,13 @@ public class ImportTest {
     public void testExistingPlayer() {
         KarmaPlayer kp = mock(KarmaPlayer.class);
         when(kp.getTrack()).thenReturn(def);
-        when(db.get("cmastudios")).thenReturn(kp);
-        when(db.exists("cmastudios")).thenReturn(true);
+        when(db.get(p)).thenReturn(kp);
+        when(db.exists(p)).thenReturn(true);
         when(p.hasPermission("karma.recruit")).thenReturn(true);
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(p.hasPermission("karma.zonemaker")).thenReturn(false);
         Server bukkitServ = mock(Server.class);
-        when(bukkitServ.getOnlinePlayers()).thenReturn(new Player[]{});
+        doReturn(new ArrayList<Player>()).when(bukkitServ).getOnlinePlayers();
         karma.server = bukkitServ;
         when(kp.getKarmaPoints()).thenReturn(15);
         when(config.getString("promotion.command")).thenReturn("pex user <player> setgroup <group>");
@@ -111,7 +110,7 @@ public class ImportTest {
     public void testExistingPlayerPermissionWipe() {
         KarmaPlayer kp = mock(KarmaPlayer.class);
         when(kp.getTrack()).thenReturn(def);
-        when(db.get("cmastudios")).thenReturn(kp);
+        when(db.get(p)).thenReturn(kp);
 //        List<KarmaGroup> modgroups = Arrays.asList(
 //                new KarmaGroup("minimod", 500, ChatColor.WHITE),
 //                new KarmaGroup("moderator", 1000, ChatColor.BLACK),
@@ -119,12 +118,12 @@ public class ImportTest {
 //        KarmaTrack mod = new KarmaTrack("mod");
 //        mod.setGroups(groups);
 //        karma.tracks = Arrays.asList(def, mod);
-        when(db.exists("cmastudios")).thenReturn(true);
+        when(db.exists(p)).thenReturn(true);
         when(p.hasPermission("karma.recruit")).thenReturn(false);
         when(p.hasPermission("karma.builder")).thenReturn(false);
         when(p.hasPermission("karma.zonemaker")).thenReturn(false);
         Server bukkitServ = mock(Server.class);
-        when(bukkitServ.getOnlinePlayers()).thenReturn(new Player[]{});
+        doReturn(new ArrayList<Player>()).when(bukkitServ).getOnlinePlayers();
         karma.server = bukkitServ;
         when(kp.getKarmaPoints()).thenReturn(15);
         when(config.getString("promotion.command")).thenReturn("pex user <player> setgroup <group>");
@@ -140,13 +139,13 @@ public class ImportTest {
         when(kp.getTrack()).thenReturn(def);
         // 5 days off the server
         when(kp.getLastActivityTime()).thenReturn(System.currentTimeMillis() - (86400000 * 5));
-        when(db.get("cmastudios")).thenReturn(kp);
-        when(db.exists("cmastudios")).thenReturn(true);
+        when(db.get(p)).thenReturn(kp);
+        when(db.exists(p)).thenReturn(true);
         when(p.hasPermission("karma.recruit")).thenReturn(true);
         when(p.hasPermission("karma.builder")).thenReturn(true);
         when(p.hasPermission("karma.zonemaker")).thenReturn(false);
         Server bukkitServ = mock(Server.class);
-        when(bukkitServ.getOnlinePlayers()).thenReturn(new Player[]{});
+        doReturn(new ArrayList<Player>()).when(bukkitServ).getOnlinePlayers();
         karma.server = bukkitServ;
         when(kp.getKarmaPoints()).thenReturn(15);
         when(config.getString("promotion.command")).thenReturn("pex user <player> setgroup <group>");
@@ -157,15 +156,4 @@ public class ImportTest {
         verify(kp).removeKarmaAutomatic(5);
         verify(bukkitServ, never()).dispatchCommand(any(CommandSender.class), anyString());
     }
-    class DummyResourceBundle extends ListResourceBundle {
-
-        private Object[][] contents = new Object[][]{
-            {"WELCOME", "welcome message"},
-            {"PREFIX", "karma: "}
-        };
-
-        protected Object[][] getContents() {
-            return contents;
-        }
-    };
 }

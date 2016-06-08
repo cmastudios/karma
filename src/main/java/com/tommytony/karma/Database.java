@@ -2,6 +2,8 @@ package com.tommytony.karma;
 
 import java.io.File;
 import java.sql.*;
+
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class Database {
@@ -40,94 +42,132 @@ public class Database {
 
     }
 
-    public boolean exists(String playerName) {
-        return get(playerName) != null ? true : false;
+    public boolean exists(OfflinePlayer player) {
+        return get(player) != null;
     }
 
-    public KarmaPlayer get(String playerName) {
-        KarmaPlayer karmaPlayer = null;
-        if (this.sqlite()) {
-            try {
-                Connection conn = this.getConnection();
-                PreparedStatement stmt = conn.prepareStatement("SELECT * FROM players WHERE name = ?");
-                stmt.setString(1, playerName);
-                ResultSet result = stmt.executeQuery();
-                if (result.next()) {
+    /**
+     * Get the player based on the player's name or UUID, while converting to UUID.
+     * @param player Bukkit object to draw from.
+     * @return karma player
+     */
+    public KarmaPlayer get(OfflinePlayer player) {
+        if (!this.sqlite())
+            throw new RuntimeException("Err... why do you not have SQLite installed?");
+        try (Connection conn = this.getConnection()) {
+            // First check the database to see if the user is either in name or UUID format
+            boolean idExists = inlineExistsUUID(player, conn), nameExists = inlineExistsName(player, conn);
+            // No results at all? quit
+            if (!idExists && !nameExists)
+                return null;
+            // Only name exists? Do a conversion first
+            if (!idExists)
+                inlineConvertToUUID(player, conn);
+            // Finally, query the database again for the return
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM players WHERE name = ?")) {
+                stmt.setString(1, player.getUniqueId().toString());
+                try (ResultSet result = stmt.executeQuery()) {
+                    if (!result.next())
+                        return null;
                     KarmaTrack track = karma.getTrack(result.getLong("track"));
                     if (track == null) {
-                        Player player = karma.server.getPlayerExact(playerName);
-                        if (player != null) {
+                        if (player.isOnline()) {
                             // If player is online get their track normally
-                            track = karma.getInitialTrack(player);
+                            track = karma.getInitialTrack(player.getPlayer());
                         } else {
                             track = karma.getDefaultTrack();
                         }
                     }
-                    karmaPlayer = new KarmaPlayer(this.karma, playerName, 
-                            result.getInt("karma"), 
-                            result.getLong("lastactive"), 
-                            result.getLong("lastgift"), 
+                    return new KarmaPlayer(this.karma, player,
+                            result.getInt("karma"),
+                            result.getLong("lastactive"),
+                            result.getLong("lastgift"),
                             track);
                 }
-                result.close();
-                stmt.close();
-                conn.close();
-            } catch (SQLException e) {
-                this.karma.log.warning("Error while getting " + playerName + ". " + e.toString());
             }
+        } catch (SQLException e) {
+            karma.log.warning("Failed to get karma player for " + player.toString());
+            return null;
         }
-        return karmaPlayer;
     }
 
     public void put(KarmaPlayer karmaPlayer) {
-        if (this.sqlite()) {
-            boolean exists = this.exists(karmaPlayer.getName());
-            try {
-                Connection conn = this.getConnection();
-                Statement stat = conn.createStatement();
-                if (exists) {
-                    // update
-// Tom's bad code                   
-//                    stat.executeUpdate(
-//                            "update players set karma=" + karmaPlayer.getKarmaPoints()
-//                            + ", lastactive=" + karmaPlayer.getLastActivityTime()
-//                            + ", lastgift=" + karmaPlayer.getLastGiftTime()
-//                            + " where name='" + karmaPlayer.getName() + "'");
-                    // Cma's good code
-                    PreparedStatement pstmt = conn.prepareStatement(
-                    "UPDATE players SET karma = ?, lastactive = ?, lastgift = ?, track = ? WHERE name = ?");
-                    pstmt.setInt(1, karmaPlayer.getKarmaPoints());
-                    pstmt.setLong(2, karmaPlayer.getLastActivityTime());
-                    pstmt.setLong(3, karmaPlayer.getLastGiftTime());
-                    //TODO: Don't Ever store anything in a database as a String unless you are absolutly forced to cma, assign numbers to the tracks... -grin
-                    pstmt.setLong(4, karmaPlayer.getTrack().getName().hashCode());
-                    pstmt.setString(5, karmaPlayer.getName());
-                    pstmt.executeUpdate();
-                    // See, much better!
-                } else {
-                    // insert
-                    PreparedStatement pstmt = conn.prepareStatement(
-                    "INSERT INTO players (name, karma, lastactive, lastgift, track) VALUES (?, ?, ?, ?, ?)");
-                    pstmt.setString(1, karmaPlayer.getName());
-                    pstmt.setInt(2, karmaPlayer.getKarmaPoints());
-                    pstmt.setLong(3, karmaPlayer.getLastActivityTime());
-                    pstmt.setLong(4, karmaPlayer.getLastGiftTime());
-                    pstmt.setLong(5, karmaPlayer.getTrack().getName().hashCode());
-                    pstmt.executeUpdate();
-
-//                    stat.executeUpdate(
-//                            "insert into players values ('" + karmaPlayer.getName() + "', "
-//                            + karmaPlayer.getKarmaPoints() + ", " + karmaPlayer.getLastActivityTime() + ", " + karmaPlayer.getLastGiftTime() + ", 0)");
+        if (!this.sqlite())
+            throw new RuntimeException("Err... why do you not have SQLite installed?");
+        try (Connection conn = this.getConnection()) {
+            if (inlineExistsUUID(karmaPlayer.getPlayer(), conn)) {
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE players SET karma = ?, lastactive = ?, lastgift = ?, track = ? WHERE name = ?")) {
+                    stmt.setInt(1, karmaPlayer.getKarmaPoints());
+                    stmt.setLong(2, karmaPlayer.getLastActivityTime());
+                    stmt.setLong(3, karmaPlayer.getLastGiftTime());
+                    stmt.setLong(4, karmaPlayer.getTrack().getName().hashCode());
+                    stmt.setString(5, karmaPlayer.getPlayer().getUniqueId().toString());
+                    stmt.executeUpdate();
                 }
-                stat.close();
-                conn.close();
-            } catch (SQLException e) {
-                if (exists) {
-                    this.karma.log.warning("Error while updating " + karmaPlayer.getName() + ". " + e.toString());
-                } else {
-                    this.karma.log.warning("Error while inserting " + karmaPlayer.getName() + ". " + e.toString());
+            } else {
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO players (name, karma, lastactive, lastgift, track) VALUES (?, ?, ?, ?, ?)")) {
+                    stmt.setString(1, karmaPlayer.getPlayer().getUniqueId().toString());
+                    stmt.setInt(2, karmaPlayer.getKarmaPoints());
+                    stmt.setLong(3, karmaPlayer.getLastActivityTime());
+                    stmt.setLong(4, karmaPlayer.getLastGiftTime());
+                    stmt.setLong(5, karmaPlayer.getTrack().getName().hashCode());
+                    stmt.executeUpdate();
                 }
             }
+        } catch (SQLException e) {
+            this.karma.log.warning("Error fixing " + karmaPlayer.toString());
+        }
+    }
+
+    private void inlineConvertToUUID(OfflinePlayer player, Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "UPDATE players SET name = ? WHERE name = ?"
+        )) {
+            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setString(2, player.getName());
+            stmt.executeUpdate();
+        }
+    }
+
+    private boolean inlineExistsUUID(OfflinePlayer player, Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT * FROM players WHERE name = ?"
+        )) {
+            stmt.setString(1, player.getUniqueId().toString());
+            try (ResultSet result = stmt.executeQuery()) {
+                return result.next();
+            }
+        }
+    }
+
+    private boolean inlineExistsName(OfflinePlayer player, Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT * FROM players WHERE name = ?"
+        )) {
+            stmt.setString(1, player.getName());
+            try (ResultSet result = stmt.executeQuery()) {
+                return result.next();
+            }
+        }
+    }
+
+    public boolean existsName(OfflinePlayer player) {
+        try (Connection conn = this.getConnection()) {
+            return inlineExistsName(player, conn);
+        } catch (SQLException e) {
+            this.karma.log.warning("Error finding " + player.toString());
+            return false;
+        }
+    }
+
+    public boolean existsUUID(OfflinePlayer player) {
+        try (Connection conn = this.getConnection()) {
+            return inlineExistsUUID(player, conn);
+        } catch (SQLException e) {
+            this.karma.log.warning("Error finding " + player.toString());
+            return false;
         }
     }
 
