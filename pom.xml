@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tommytony</groupId>
     <artifactId>karma</artifactId>
-    <version>1.1</version>
+    <version>1.2-SNAPSHOT</version>
     <name>Karma</name>
     <url>http://dev.bukkit.org/bukkit-plugins/karma-ranking/</url>
     <description>Automatic ranking of players based on a point system</description>
